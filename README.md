@@ -22,7 +22,8 @@ Features
 
 * Transparency of results. Each forecast comes with a 90 day performance
 analysis to expose the Slope and R2 values of past predictions for each
-metric.
+metric. Additonaly, you can mouse over each histogram bar to see that 
+metrics correlation scatter plot.
 
 * Frontend powered by Google App Engine and Google NDB Datastore,
 Google Charts, and in development is a new Polymer based site.
