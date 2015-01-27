@@ -1,0 +1,102 @@
+[
+  {
+    "uid": 1,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nyse.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 1
+  },
+  {
+    "uid": 2,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/amex.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 2
+  },
+    {
+    "uid": 3,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nasdaq.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 3
+  },
+  {
+    "uid": 4,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nyse.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 1
+  },
+  {
+    "uid": 5,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nasdaq.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 2
+  },
+  {
+    "uid": 6,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/amex.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 1
+  },
+  {
+    "uid": 7,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nasdaq.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 3
+  },
+  {
+    "uid": 8,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nyse.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 2
+  },
+  {
+    "uid": 9,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/nyse.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 1
+  },
+  {
+    "uid": 10,
+    "text" : "Previous Close vs Predicted Close",
+    "username" : "GOOG",
+    "avatar" : "../images/amex.png",
+    "favorite": false,
+    "point_change": 9.51,
+    "percent_change": 8.65,
+    "model_accuracy": 1
+  }
+]

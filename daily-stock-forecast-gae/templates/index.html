@@ -1,0 +1,64 @@
+<html>
+    <head>
+        <title>{{title}}</title>
+    </head>
+    <style type="text/css">
+        table {
+            border-spacing: 0px;
+        }
+        td {
+            border-bottom: solid black 1px;
+            padding: 10px;
+            empty-cells: show;
+        }
+        thead td {
+            font-weight: bold;
+        }
+        tr.expired {
+            background-color: #FFE9A6;
+        }
+    </style>
+    <body>
+        <h1>{{title}}</h1>
+        <h2>Configuration:</h2>
+        <ul>
+            <li>DRY_RUN: {{config.DRY_RUN}}
+            <li>GCE_PROJECT_ID: {{config.GCE_PROJECT_ID}}
+            <li>SAFE_TAGS: {{', '.join(config.SAFE_TAGS)}}
+            <li>TIMEOUT: {{config.TIMEOUT}}
+        </ul>
+        <h2>Instances:</h2>
+        <table>
+            <thead>
+                <td>Name</td>
+                <td>Age</td>
+                <td>Creation timestamp</td>
+                <td>Type</td>
+                <td>Excluded</td>
+                <td>Tags</td>
+                <td>Description</td>
+            </thead>
+        {% for i in instances %}
+        <tr {{'class="expired"' if i._timeout_expired}}>
+                <td>{{i.name}}</td>
+                <td>{{i._age_minutes}}</td>
+                <td>{{i.creationTimestamp}}</td>
+                <td>{{i.machineType.split('/')[-1]}}</td>
+                <td>{{i._excluded}}</td>
+                <td>{{', '.join(i._tags)}}</td>
+                <td>{{i.description}}</td>
+            </tr>
+        {% endfor %}
+        </table>
+        <h3>Legend</h3>
+        <table>
+            <tr class="expired">
+                <td>Expired - will be deleted soon</td>
+            </tr>
+        </table>
+        <br/><br/>
+        <h3>Raw instance data:</h3>
+        <pre>{{raw_instances}}</pre>
+    </body>
+</html>
+

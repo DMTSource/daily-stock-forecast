@@ -1,0 +1,13 @@
+[
+  {
+    "rank": 1,
+    "symbol" : "GOOG",
+    "company_name" : "Google Inc.",
+    "avatar" : "../images/avatar-01.svg",
+    "favorite": false,
+    "exchange": "NYSE",
+    "p_close_change": 3.00,
+    "p_close_change_percent": 1.00,
+    "accuracy": 1
+  },
+]

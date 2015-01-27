@@ -1,0 +1,7 @@
+indexes:
+
+- kind: Forecast
+  ancestor: no
+  properties:
+  - name: date
+  - name: rank

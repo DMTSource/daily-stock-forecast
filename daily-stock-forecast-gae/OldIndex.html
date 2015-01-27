@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+  <head>
+  <title>StockBot</title>
+  <link rel="shortcut icon" href="/oldImages/favicon.ico" />
+  
+  <style>
+  body{margin: 0px 0px 0px 0px;padding:0;font-family: sans-serif;}
+  #search{width:60%; height: 25px; margin-top:6px;margin-left:10%;}
+  #topbanner{min-width:850px;width:100%;height:55px;border: 1px solid;background-color:#F2F2F2;border-color:#F2F2F2;border-bottom-color:#EBEBEB;}
+  #logo{margin:5px 0px 0px 10px;}
+  #marketview{margin-top:10px;margin-right:auto;margin-left:auto;width:930px;height:93px;border:0px solid;border-color:#2B8FF0;}
+  #appinfo{margin:-22px -3px 0px 0px;padding:3px; color:#797A7E; line-height: 100%;width:167px;text-align:center;font-size:12px;border: 1px solid;background-color:#FBFBFB;border-color:#E2E2E6;border-bottom-color:#EBEBEB;}
+  #stockheader{text-align:center;margin-right:auto;margin-left:auto;margin-top:20px;width:930px;height:59px;border:0px solid;border-color:#2B8FF0;}
+  #stockplaceholder{text-align:center;margin-right:auto;margin-left:auto;margin-top:20px;width:930px;height:300px;border:0px solid;border-color:#2B8FF0;}
+  #stockbox{font-size:11px;vertical-align:middle;text-align:center;margin-right:auto;margin-left:auto;border:0px solid;border-color:#BCDBFA;}
+
+  </style>
+  
+  <link rel="stylesheet" href="/jquery-ui-1.11.2/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="/jquery-ui-1.11.2/jquery-ui.js"></script>
+  <script>
+  $(function() {
+    $( "#accordion" ).accordion({
+      collapsible: true
+    });
+	$( "#accordion" ).accordion( "option", "icons", null );
+  });
+  </script>
+  
+  
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+		google.load("visualization", "1", {packages:["corechart"]});
+		google.load("visualization", "1.1", {packages:["bar"]});
+		google.setOnLoadCallback(drawChart);
+		google.setOnLoadCallback(drawTooltipCharts);
+		
+  function drawChart() {
+    
+	var candleOptions = {
+		title:'PRICE HISTORY + 1 DAY PREDICTION',
+        legend:'none',
+		width: 420, height: 209,
+	    chartArea: {left: '10%',width:'78%',height:'82%'},
+		seriesType: "candlesticks",
+		tooltip: {isHtml: true},
+		//colors: ['yellow','orange'],
+		candlestick: { 
+			//fallingColor:{fill:"red", stroke:"red"},
+			//risingColor:{fill:"blue", stroke:"blue"}
+		},
+		
+		series: {
+			0: {type: 'candlesticks',targetAxisIndex: 0},
+			1: {type: 'bars', targetAxisIndex: 1, color: '#E8EAF6'}
+		},
+    };
+	
+	  //['Day', 'Low', 'Open', 'Close', 'High'],
+	  //['M', 20, 28, 38, 45],...
+	{% set num = 0 %}
+	{% for table in forecast_data %}
+	//var predData{{ "%d"%num }} = google.visualization.arrayToDataTable([
+	//	//['Day', 'Low', 'Open', 'Close', 'High', 'Volume'],
+	//	{% for row in table[:][:] %}
+	//	['{{ row[0] }}'{{ ",{0:0.2f},{1:0.2f},{2:0.2f},{3:0.2f},{4:0.0f}".format(row[1],row[2],row[3],row[4],row[5])}}, 'TEST'],
+	//	{% endfor %}
+	//], true);
+	
+	
+	var candleData{{ "%d"%num }} = [
+		//['Day', 'Low', 'Open', 'Close', 'High', TOOLTIP} , 'Volume'],
+		{% for row in table[:][:] %}
+		['{{ row[0] }}'{{ ",{0:0.2f},{1:0.2f},{2:0.2f},{3:0.2f}".format(row[1],row[2],row[3],row[4]) }}, '<div style="font-size:10px;padding:5px 5px 5px 5px;">{{ "{0:s}".format(row[0]) }} <br/> {{ "Open: {0:0.2f} - Close: {1:0.2f}".format(row[2],row[3]) }} <br/> {{ "High: {0:0.2f} - Low: {1:0.2f}".format(row[4],row[1]) }}</div>', {{"{0:0.0f}".format(row[5])}}],
+		{% endfor %}
+	];
+	
+	var predData{{ "%d"%num }} = new google.visualization.DataTable();
+        predData{{ "%d"%num }}.addColumn('string', 'Day');
+        predData{{ "%d"%num }}.addColumn('number', 'Low');
+		predData{{ "%d"%num }}.addColumn('number', 'Open');
+		predData{{ "%d"%num }}.addColumn('number', 'Close');
+		predData{{ "%d"%num }}.addColumn('number', 'High');
+		predData{{ "%d"%num }}.addColumn({'type': 'string', 'role': 'tooltip', 'p': {'html': true}});
+		predData{{ "%d"%num }}.addColumn('number', 'Volume');
+		
+        // Add your data (with the newly added tooltipImg).
+        predData{{ "%d"%num }}.addRows(candleData{{ "%d"%num }});
+	 
+	
+	var chart{{ "%d"%num }} = new google.visualization.ComboChart(document.getElementById('forecast_div{{ "%s"%num }}'));
+	chart{{ "%d"%num }}.draw(predData{{ "%d"%num }}, candleOptions);
+	{% set num = num + 1 %}
+	{% endfor %}
+	}
+	
+	
+	
+	
+	
+	{% set num = 0 %}
+	{% for stock in stock_list %}
+	// Set up data for visible chart. //['Prediction','Slope','R2'],
+      var primaryData{{ "%d"%num }} = [
+	  {% set num = num + 1 %}
+        ['Open', {{ stock.openPredSlope }},,{{ stock.openPredR2 }},],
+        ['Close', {{ stock.closePredSlope }},,{{ stock.closePredR2 }},],
+        ['High', {{ stock.highPredSlope }},,{{ stock.highPredR2 }},],
+        ['Low', {{ stock.lowPredSlope }},,{{ stock.lowPredR2 }},],
+        ['Volume', {{ stock.volumePredSlope }},,{{ stock.volumePredR2 }},]
+      ];
+	{% endfor %}
+	
+	{% set num = 0 %}
+	{% for table in validation_data %}
+      // Set up data for your tooltips.
+      var tooltipData{{ "%d"%num }} = [
+	  {% set num = num + 1 %}
+	    ['Real', 'Predicted','Real', 'Predicted','Real', 'Predicted','Real', 'Predicted','Real', 'Predicted'],
+		{% for row in table[:][:] %}
+		[{{row[0]}},{{row[1]}},{{row[2]}},{{row[3]}},{{row[4]}},{{row[5]}},{{row[6]}},{{row[7]}},{{row[8]}},{{row[9]}}],
+		{% endfor %}
+      ];
+	{% endfor %}
+	
+      var primaryOptions = {
+        title: 'MODEL CORRELATION SLOPE/R2',
+		legend: {position:'in', alignment:'center', maxLines: 1},
+        tooltip: {isHtml: true}, // This MUST be set to true for your chart to show.
+		width: 290, height: 209,
+		chartArea: {left: '15%',width:'84%',height:'80%'},
+		//focusTarget: 'category',
+		seriesType: "bars",
+		colors: ['#2196F3','#3F51B5'],
+		series: {
+			0: {type: 'bars'},
+			5: {type: 'bars'}
+		},
+      };
+
+      var tooltipOptions = {
+        //title: 'CORRELATION DEPENDENCE',
+        legend: 'none',
+		width: 190, height: 190,
+		chartArea: {width:'70%',height:'70%'},
+		hAxis: {title: 'Real',textPosition: 'none'},
+        vAxis: {title: 'Predicted',textPosition: 'none'},//, textPosition:'out'},
+		pointSize: 2,
+		trendlines: {
+            0: {
+              type: 'linear',
+              showR2: false,
+              visibleInLegend: false,
+			  lineWidth: 0.5, // Set the size of the trendline dots.
+			  opacity: 0.1
+            }
+          }
+      };
+	
+      // Draws your charts to pull the PNGs for your tooltips.
+      function drawTooltipCharts() {
+		{% set num = 0 %}
+		{% for stock in stock_list %}
+		
+        var data{{ "%d"%num }} = new google.visualization.arrayToDataTable(tooltipData{{ "%d"%num }});
+        var view{{ "%d"%num }} = new google.visualization.DataView(data{{ "%d"%num }});
+
+        // For each row of primary data, draw a chart of its tooltip data.
+        for (var i = 0; i < primaryData{{ "%d"%num }}.length; i++) {
+
+          // Set the view for each event's data
+          view{{ "%d"%num }}.setColumns([i*2, i*2 + 1]);
+		  //view{{ "%d"%num }}.setColumns([0, i + 1]);
+
+          var hiddenDiv{{ "%d"%num }} = document.getElementById('hidden_div{{ "%s"%num }}');
+          var tooltipChart{{ "%d"%num }} = new google.visualization.ScatterChart(hiddenDiv{{ "%d"%num }});
+
+          google.visualization.events.addListener(tooltipChart{{ "%d"%num }}, 'ready', function() {
+
+            // Get the PNG of the chart and set is as the src of an img tag.
+            var tooltipImg{{ "%d"%num }} = '<img src="' + tooltipChart{{ "%d"%num }}.getImageURI() + '">';
+
+            // Add the new tooltip image to your data rows.
+            primaryData{{ "%d"%num }}[i][2] = tooltipImg{{ "%d"%num }};
+			primaryData{{ "%d"%num }}[i][4] = tooltipImg{{ "%d"%num }};
+
+          });
+		  if(i==0){
+			tooltipOptions.title = 'OPEN PRED. CORRELATION';
+		  }else if(i==1){
+			tooltipOptions.title = 'CLOSE PRED. CORRELATION';
+		  }else if(i==2){
+			tooltipOptions.title = 'HIGH PRED. CORRELATION';
+		  }else if(i==3){
+			tooltipOptions.title = 'LOW PRED. CORRELATION';
+		  }else if(i==4){
+			tooltipOptions.title = 'VOLUME PRED. CORRELATION';
+		  }
+
+          tooltipChart{{ "%d"%num }}.draw(view{{ "%d"%num }}, tooltipOptions);
+        }
+        drawPrimaryChart{{ "%d"%num }}();
+		{% set num = num + 1 %}
+	    {% endfor %}
+      }
+	  
+	  
+	 {% set num = 0 %}
+	{% for stock in stock_list %}
+      function drawPrimaryChart{{ "%d"%num }}() {
+
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Prediction');
+        data.addColumn('number', 'Slope');
+        data.addColumn({
+          type: 'string',
+          label: 'Tooltip Chart',
+          role: 'tooltip',
+          'p': {'html': true}
+        });
+		data.addColumn('number', 'R2');//?
+		data.addColumn({
+          type: 'string',
+          label: 'Tooltip Chart',
+          role: 'tooltip',
+          'p': {'html': true}
+        });
+		
+        // Add your data (with the newly added tooltipImg).
+        data.addRows(primaryData{{ "%d"%num }});
+
+        var visibleDiv{{ "%d"%num }} = document.getElementById('validation_div{{ "%s"%num }}');
+        var primaryChart{{ "%d"%num }} = new google.visualization.ComboChart(visibleDiv{{ "%d"%num }});
+        primaryChart{{ "%d"%num }}.draw(data, primaryOptions);
+		
+	
+	  }
+	  {% set num = num + 1 %}
+	  {% endfor %}
+    </script>
+  
+  
+  </head>
+  <body>
+	<div id="topbanner">
+	<table style="width:100%" style="text-align:center;">
+		<tr>
+			<td width="150px">
+				<img src="/oldImages/companyLogo.png" id="logo" />
+			</td>
+			<td width="70px" style="text-align:center">
+				<span style="color:blue;font-size:15px; vertical-align:-20%;">Stocks</span><div style=" width:50px;height:5px;background-color:blue;margin:16px auto -20px auto;"></div>
+			</td>
+			<td width="70px" style="text-align:center">
+				<span style="color:#797A7E;font-size:15px; vertical-align:-20%;">Options</span>
+			</td>
+			<td width="70px" style="text-align:center">
+				<span style="color:#797A7E;font-size:15px; vertical-align:-20%;">ETFs</span>
+			</td>
+			<td width="75px" style="text-align:center">
+				<span style="color:#797A7E;font-size:15px; vertical-align:-20%;">Currencies</span>
+			</td>
+			<td style="text-align:center">
+				
+			</td>
+			<td width="18%" style="text-align:right; padding-right:5px;">
+				<span style="color:#797A7E;font-size:13px;"><a href="{{ url|safe }}">{{ url_linktext }}</a><br />
+				Consulting Services Contact</span>
+			</td>
+			<td width="4%" style="text-align:center;">
+				<img src="/oldImages/settings.png" style="margin-top:8px;" />
+			</td>
+			<td width="4%" style="text-align:center;">
+				<img src="/oldImages/help.png" style="margin-top:5px;" />
+			</td>
+			<td width="4%" style="text-align:center;">
+				<img src="/oldImages/search.png" style="margin-top:5px;" />
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+
+	<div id="marketview">
+	<table style="width:100%" style="text-align:center;">
+	  <tr>
+        <td colspan=5>{{ timeStr }}</td>
+		<td colspan=1 style="text-align:right;"><b>U.S.&#8595;</b></td>
+		<td rowspan=2 style="width:167px;"><div id="appinfo"><b>StockBot</b> forecast updated X minutes ago @ X:XXam<br /><br />
+			Total Forecasts:<br />
+			{{ "{0:,d}".format(forecast_count) }}<br /><br />
+			Copyright 2015 Stock Bot</div></td>
+      </tr>
+	  <tr>
+		<td><p><a href="#">S&P 500</a><br /><b>3,214.34</b><br /><span style="font-size: 12px; color:#00B200;"><b>+9.42 (0.46&#37;)</b></span></p></td>
+		<td style="text-align:center;"><img width="150px" height="65px" src="http://chart.finance.yahoo.com/z?s=^gspc&t=1d&q=l&l=on&z=s"/></td>
+		
+		<td><p><a href="#">Dow</a><br /><b>13,234.21</b><br /><span style="font-size: 12px; color:#00B200;"><b>+9.42 (0.46&#37;)</b></span></p></td>
+		<td style="text-align:center;"><img width="150px" height="65px" src="http://chart.finance.yahoo.com/z?s=^dji&t=1d&q=l&l=on&z=s"/></td>
+		
+		<td><p><a href="#">Nasdaq</a><br /><b>4,574.26</b><br /><span style="font-size: 12px; color:#00B200;"><b>+9.42 (0.46&#37;)</b></span></p></td>
+		<td style="text-align:center;"><img width="150px" height="65px"  src="http://chart.finance.yahoo.com/z?s=^ixic&t=1d&q=l&l=on&z=s&p=m50"/></td>
+		
+		
+	  </tr>
+	</table>
+	</div>
+	
+	{% if forecast_data|length > 0 %}
+	<div id="stockheader">
+		<table style="width:100%;height:100%; margin: 0px 0px 0px 0px; padding;0px;">
+			<tr>
+				<td width="371px" align="left"><img style="margin:0px 0px 4px -4px;vertical-align:middle;" src="/oldImages/calendarButton.png" />
+				<span style="color:#797A7E;font-size:32px;"><b>{{ dayOfForecast }}</span></b></td>
+				<div style="position:absolute;margin:-5px 0px 0px 155px;color:blue;"><b>{{nameOfDayOfForecast}}<b></div>
+				<td><div style="width: 555px; height: 50px;background-image:url(/oldImages/tableTop.png);margin: 7px -3px 0px 0px"> </div></td>
+			</tr>
+		</table>
+	</div>
+	{% else %}
+	<div id="stockplaceholder">
+		<table style="width:100%;height:100%; margin: 0px 0px 0px 0px; padding;0px;">
+			<tr>
+				<td>Forecast is processing, please check back soon.</td>
+			</tr>
+		</table>
+	</div>
+	{% endif %}
+	
+	
+	<div id="accordion">
+		{% set num = 0 %}
+		{% for stock in stock_list %}
+		<h3 style="width:930px;height:36px;margin: 0px auto 5px auto;padding:0px;">
+		<div id="stockbox">
+		<table style="width:100%;height:36px;margin: 0px 0px 0px 0px;padding:0;">
+			<tr>
+				<td width="5%">&#35;{{ stock.rank }}</td>
+				<td><b>{{ stock.symbol }}</b></td>
+				<td>{{ stock.company }}</td> 
+				<td>{{ stock.exchange }}</td>
+				{% if computed_values[num][1] > 0.0 %}
+				<td width="12%" style="color:green;"><b>&#8593;{{'{0:,.2f}'.format(computed_values[num][0]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][1]) }}&#37;&#41;</b></td>
+				{% else %}
+				<td width="12%" style="color:red;"><b>&#8595;{{'{0:,.2f}'.format(computed_values[num][0]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][1]) }}&#37;&#41;</b></td>
+				{% endif %}
+				{% if computed_values[num][3] > 0.0 %}
+				<td width="12%" style="color:green;"><b>&#8593;{{ '{0:,.2f}'.format(computed_values[num][2]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][3]) }}&#37;&#41;</b></td>
+				{% else %}
+				<td width="12%" style="color:red;"><b>&#8595;{{ '{0:,.2f}'.format(computed_values[num][2]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][3]) }}&#37;&#41;</b></td>
+				{% endif %}
+				{% if computed_values[num][5] > 0.0 %}
+				<td width="12%" style="color:green;"><b>&#8593;{{ '{0:,.2f}'.format(computed_values[num][4]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][5]) }}&#37;&#41;</b></td>
+				{% else %}
+				<td width="12%" style="color:red;"><b>&#8595;{{ '{0:,.2f}'.format(computed_values[num][4]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][5]) }}&#37;&#41;</b></td>
+				{% endif %}
+				{% if computed_values[num][7] > 0.0 %}
+				<td width="12%" style="color:green;"><b>&#8593;{{ '{0:,.2f}'.format(computed_values[num][6]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][7]) }}&#37;&#41;</b></td>
+				{% else %}
+				<td width="12%" style="color:red;"><b>&#8595;{{ '{0:,.2f}'.format(computed_values[num][6]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][7]) }}&#37;&#41;</b></td>
+				{% endif %}
+				{% if computed_values[num][9] > 0.0 %}
+				<td width="12%" style="color:green;"><b>&#8593;{{ '{0:,.0f}'.format(computed_values[num][8]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][9]) }}&#37;&#41;</b></td>
+				{% else %}
+				<td width="12%" style="color:red;"><b>&#8595;{{ '{0:,.0f}'.format(computed_values[num][8]) }} &#40;{{ '{0:,.2f}'.format(computed_values[num][9]) }}&#37;&#41;</b></td>
+				{% endif %}
+			</tr>
+		</table>
+		</div>
+		</h3>
+		<div style="width:930px;margin: -5px auto 5px auto;padding:0px;overflow-y:hidden;overflow-x:hidden;">
+			<table style="width:100%;margin: 0px 0px 0px 0px; padding;0px; border:0px;">
+				<tr>
+					<td width="220px">
+						<table style="width:100%;color:#797A7E; margin: 0px auto 0px auto; padding;0px;font-size:11px;">
+							<tr>
+								<td colspan=2 style="text-align:center;font-size:11px;">
+								MARKET SNAPSHOT
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Predicted Open:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}'.format(stock.openPredPrice[-1]) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Predicted Close:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}'.format(stock.closePredPrice[-1]) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Predicted High:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}'.format(stock.highPredPrice[-1]) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Predicted Low:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}'.format(stock.lowPredPrice[-1]) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Predicted Vol.:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.0f}'.format(stock.volumePred[-1]) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Open Slope/R2:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}/{1:,.2f}'.format(stock.openPredSlope, stock.openPredR2) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Close Slope/R2:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}/{1:,.2f}'.format(stock.closePredSlope, stock.closePredR2) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								High Slope/R2:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}/{1:,.2f}'.format(stock.highPredSlope, stock.highPredR2) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Low Slope/R2:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}/{1:,.2f}'.format(stock.lowPredSlope, stock.lowPredR2) }}
+								</td>
+							</tr>
+							<tr>
+								<td>
+								Vol. Slope/R2:
+								</td>
+								<td style="text-align:right;">
+								{{ '{0:,.2f}/{1:,.2f}'.format(stock.volumePredSlope, stock.volumePredR2) }}
+								</td>
+							</tr>
+						</table>
+
+					</td>
+					<td>
+						<div id="forecast_div{{ '%s'%num }}" style="width: 420px; height: 209px;margin:0px auto 0px auto;text-align:center;"></div>
+					</td>
+					<td>
+						<div id="hidden_div{{ '%s'%num }}" style="width:100px;height:100px;display:none;"></div>
+						<div id="validation_div{{ '%s'%num }}" style="width:290px;height:209px;margin:0px auto 0px auto;text-align:center;"></div>
+						{% set num = num + 1 %}
+					</td>
+				</tr>
+			</table>
+		</div>
+		{% endfor %}
+	</div>
+
+	
+	
+    <div style="font-size:12px;width:95%;padding-left:20px;margin-top:20px;color:#CBCBCB;">
+			All forecasts are for informational purposed only and are NOT to be taken as trading advice, use this site at your own risk.<br />
+            StockBot relies on machine learning to make forecasts based on historical pric/volume data. Forecasts are made daily after market close.<br />
+		
+    </div>
+	<div style="font-size:13px;width:95%;height:30px;padding-left:20px; margin-top:10px;margin-bottom:25px;">
+			&#169; 2015 StockBot | Stocks | Options | ETFs | Currencies | 
+			StockBot on 
+			<a href ="#"><img src="/oldImages/gplus-16.png" style="margin:0px 0px -3px 5px;" /></a> 
+			<a href ="#"><img src="/oldImages/facebook-16.png" style="margin:0px 0px -3px 5px;" /></a> 
+			<a href ="#"><img src="/oldImages/twitter-16.png" style="margin:0px 0px -3px 5px;" /></a> 
+		
+    </div>
+
+    
+
+  </body>
+</html>
+{% endautoescape %}

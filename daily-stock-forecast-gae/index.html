@@ -1,0 +1,162 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <title>Daily Stock Forecast</title>
+  <link rel="icon" type="image/png"  href="/favicon.png" />
+
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+  <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+
+  <link rel="import" href="bower_components/font-roboto/roboto.html">
+  <link rel="import" href="bower_components/core-header-panel/core-header-panel.html">
+  <link rel="import" href="bower_components/core-toolbar/core-toolbar.html">
+  <link rel="import" href="bower_components/core-icons/core-icons.html">
+  <link rel="import" href="bower_components/core-icons/device-icons.html">
+  <link rel="import" href="bower_components/core-menu/core-menu.html">
+  <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
+  <link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
+  <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
+  <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+  <link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
+  <link rel="import" href="bower_components/paper-item/paper-item.html">
+  <link rel="import" href="bower_components/paper-fab/paper-fab.html">
+
+  <link rel="import" href="components/stock-card.html">
+
+  <style>
+  html,body {
+    height: 100%;
+    margin: 0;
+    background-color: #E5E5E5;
+    font-family: 'RobotoDraft', sans-serif;
+  }
+  core-header-panel {
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch; 
+  }
+  core-toolbar {
+    background: #2196F3;
+    color: white;
+  }
+  #tabs {
+    width: 100%;
+    margin: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	  text-transform: uppercase;
+  }
+  .dateHeader{
+      margin-bottom: 10px;
+      font-size: 1.0rem;
+      color:#2196F3;
+      font-weight: 400;
+      background-color: #ffffff;
+      width:100%;
+      padding: 5px;
+      font-family: 'RobotoDraft', sans-serif;
+      text-align: center;
+    }
+  #currentTime{
+    display: none;
+    }
+  .container {
+    width: 92%;
+    margin: 25px auto;
+  }
+  @media (min-width: 650px) {
+    #tabs {
+      width: 325px;
+    }
+    .container {
+      width: 600px;
+    }
+    #currentTime{
+      width:350px;
+      margin-left:auto;
+      padding:17px;
+      font-family: 'RobotoDraft', sans-serif;
+      text-align: right;
+      font-size: 0.6em;
+      color:#A6D5FA;
+      display: inline;
+    }
+  }
+  </style>
+
+</head>
+
+<body unresolved>
+  <core-header-panel>
+
+    <core-toolbar class="medium-tall">
+      <core-icon icon="device:multitrack-audio"></core-icon>
+      <div flex>Daily Stock Forecast</div>
+      
+
+      <paper-menu-button>
+        <paper-icon-button id="settingsButton" icon="settings"></paper-icon-button>
+        <paper-dropdown class="dropdown" halign="right">
+          <core-menu class="menu">
+            <paper-item>Share</paper-item>
+            <paper-item>Settings</paper-item>
+            <paper-item>Feedback</paper-item>
+          </core-menu>
+        </paper-dropdown>
+      </paper-menu-button>
+
+      <paper-menu-button>
+        <paper-icon-button id="help-dialog-button" icon="help"></paper-icon-button>
+        <paper-dialog id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
+          <p flex>Daily Stock Forecast is a free service created by <a href="https://www.linkedin.com/profile/view?id=263507105">Derek M Tishler</a> powered by <a href="https://www.polymer-project.org/">Polymer</a>, <a href="https://cloud.google.com/appengine/">Google App Engine</a>, <a href="https://cloud.google.com/compute/">Google Compute Engine</a>, and <a href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>. Daily Stock Forecast uses historical stock prices and machine learning to forecast the next days open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon).</p>
+        </paper-dialog>
+      </paper-menu-button>
+
+      <paper-menu-button>
+        <paper-icon-button id="searchButton" icon="search"></paper-icon-button>
+      </paper-menu-button>
+
+      <paper-tabs id="tabs" class="bottom fit" selected="all" self-end>
+        <paper-tab name="all">Top 25</paper-tab>
+        <paper-tab name="favorites">My Stocks</paper-tab>
+        <paper-tab name="markets">Markets</paper-tab>
+      </paper-tabs>
+
+      <div class="bottom fit" id="currentTime">{{ timeStr }}</div>
+
+    </core-toolbar>
+
+    <div class="container" layout vertical center>
+
+      <div class="dateHeader">{{ dayOfForecast }}</div>
+      <stock-list show="all"></stock-list>
+      
+    </div>
+
+
+  </core-header-panel>
+
+  <script>
+  var tabs = document.querySelector('paper-tabs');
+  var list = document.querySelector('stock-list');
+
+  tabs.addEventListener('core-select', function() {
+    list.show = tabs.selected;
+  });
+
+  document.getElementById('help-dialog-button')
+    .addEventListener('click', function() {
+      console.log('Showing about dialog...');
+      document.getElementById('help-dialog').toggle();
+  });
+
+  
+  </script>
+</body>
+
+</html>
