@@ -71,7 +71,7 @@ Dependencies
 * pytz
 * sk-learn
 * googledatastore
-* Polymer (5.2+)
+* Polymer (0.5.2+)
 
 
 Credits
