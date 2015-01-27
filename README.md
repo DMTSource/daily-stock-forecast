@@ -34,6 +34,21 @@ perform machine learning on historical stock prices.
 pandas, and scikit-learn support development, analysis and
 in development visualization of stock forecasts.
 
+File Structure
+============
+Key files in the application hierarchy.
+* daily-stock-forecast-gae
+  * dailystockquant.py (App Engine homepage script)
+    * indexOld.html (Current website homepage, loaded into above script w/ Jinja2 templating)
+    * index.html (In development Polymer version of site)
+  * forecast.py (Cron job to launch a compute engine instance to perform the forecast automatically each business day) 
+* daily-stock-forecast-gce
+  * DailyForecast.py (Runs the forecast, publishes to datastore)
+    * GaussianProcess.py (Machine learning regression model, not applied to forecast currently)
+    * GetHistoricalFromYahoo.py (Download the historical values for each stock in the universe)
+    * GetSymbols.py (Use Nasdaq website to download list of stocks from 3 exchanges)
+    * SupportVectorRegression.py (Machine learning regression model)
+
 Installation
 ============
 
