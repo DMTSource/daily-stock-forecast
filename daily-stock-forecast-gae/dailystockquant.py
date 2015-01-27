@@ -2,10 +2,6 @@
 #
 # Copyright 2014 DMT SOURCE, LLC.
 #
-# This sytem is designed to perform the TishlerHarper tensor difference analysis
-# on a dataset of gaussian outout files intended for structual analysis
-#
-#
 #     DMTSOURCE.COM | CONTACT: DEREK M TISLER lstrdean@gmail.com
 #
 # Unless required by applicable law or agreed to in writing, software
