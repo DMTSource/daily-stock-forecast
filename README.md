@@ -20,7 +20,7 @@ Concept images of the in development Polymer site:<br />
 Features
 ========
 
-* Tranparency of results. Each forecast comes with a 90 day performance
+* Transparency of results. Each forecast comes with a 90 day performance
 analysis to expose the Slope and R2 values of past predictions for each
 metric.
 
@@ -31,7 +31,7 @@ Google Charts, and in development is a new Polymer based site.
 perform machine learning on historical stock prices.
 
 * Statistic and machine learning libraries like matplotlib, scipy,
-pandas, and sklearn support development, analysis and
+pandas, and scikit-learn support development, analysis and
 in development visualization of stock forecasts.
 
 Installation
@@ -44,7 +44,7 @@ soon Polymer and web components.
 The backend and analysis can run locally if the datastore writing 
 is disabled, but the current datastore exchange expects that the 
 forecast is performed "inside the project" on a Google Compute 
-Engine instance with the abiility to securly access the Datastore.
+Engine instance with the ability to securely access the Datastore.
 
 Dependencies
 ------------
