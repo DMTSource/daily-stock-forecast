@@ -8,8 +8,9 @@ from lib.Forecast import Forecast
 class MainPage (webapp2.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/plain'
+        
         #print np.arange(1,10001,1000)
-        for i in np.arange(1,10001,500):
+        for i in np.arange(1,10001,250):
             list_of_entities = Forecast.query(Forecast.rank < i)#Forecast.rank < 6000)
             list_of_keys = ndb.put_multi(list_of_entities)
             list_of_entities = ndb.get_multi(list_of_keys)

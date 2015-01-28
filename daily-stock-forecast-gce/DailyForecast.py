@@ -263,7 +263,7 @@ if __name__ == "__main__":
     datastore.set_options(dataset="daily-stock-forecast")
     
     for i in np.arange(len(symbols)):
-        if(rank[symbols[i]] <= 10000):
+        if(rank[symbols[i]] <= 1000):
             try:
                 req = datastore.CommitRequest()
                 req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
