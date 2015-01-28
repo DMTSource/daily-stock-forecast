@@ -127,7 +127,7 @@ if __name__ == "__main__":
                                             endOfHistoricalDate.year),
                                            priceFilterLow=0.0,
                                            priceFilterHigh=1e6,
-                                           minVolume=0.0,
+                                           minVolume=1000.0,
                                            useThreading=True) 
     
     #If no stocks in universe, exit
@@ -177,8 +177,8 @@ if __name__ == "__main__":
     cycleTime = tt.time() #track time of each percent sim progress
     for i in np.arange(len(predDays)):
         #set up moving window on historical data
-        #hWI = i
-        hWI = 0
+        hWI = i
+        #hWI = 0
         hWF = i+np.where(dates[0]==predDays[0].date())[0][0]#98
 
         #print status
@@ -199,8 +199,8 @@ if __name__ == "__main__":
                                                                               closePrice[j][hWI:hWF],
                                                                               np.log(volume[j][hWI:hWF])],
                                                                              genPlot = False,
-                                                                             c = 50.0,
-                                                                             Gamma = 0.005,
+                                                                             c = 100.0,
+                                                                             Gamma = 0.007,
                                                                              Epsilon = 0.1)
             """pHighBest, pLowBest, pOpenBest, pCloseBest, pVolumeBest = GaussianProcessRegressions(symbols[j],
                                                                              [high[j][hWI:hWF],
