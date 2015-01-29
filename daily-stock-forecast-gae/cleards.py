@@ -10,7 +10,7 @@ class MainPage (webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         
         #print np.arange(1,10001,1000)
-        for i in np.arange(1,10001,250):
+        for i in np.arange(1,5001,250):
             list_of_entities = Forecast.query(Forecast.rank < i)#Forecast.rank < 6000)
             list_of_keys = ndb.put_multi(list_of_entities)
             list_of_entities = ndb.get_multi(list_of_keys)

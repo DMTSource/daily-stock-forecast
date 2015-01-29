@@ -179,7 +179,7 @@ if __name__ == "__main__":
         #set up moving window on historical data
         hWI = i
         #hWI = 0
-        hWF = i+np.where(dates[0]==predDays[0].date())[0][0]#98
+        hWF = i+np.where(dates[0]==predDays[0].date())[0][0]#98 for ex cause 1 missing day and -1 for indexing on len 100
 
         #print status
         print "Simulation progress: %.0f%%, took %0.0f seconds"%(float(i+1)/float(len(predDays))*100.0, tt.time()-cycleTime)
