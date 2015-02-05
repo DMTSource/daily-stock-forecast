@@ -26,10 +26,11 @@
             <h2>{{stock.symbol}}</h2>
             <h3>{{stock.company}}</h3>
             <h4>{{stock.exchange}}</h4>
-            <h5>Previous Close vs Forecasted Close</h5>
-            <h6><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
-            {{'{0:,.2f}'.format(computed_values[{{num}}][2]) }}({{ '{0:,.2f}'.format(computed_values[{{num}}][3]) }}%)</h6>
-            <h7>Model Accuracy <img src="../images/rank1.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h7>
+            <h5>{{stock.exchange}}</h5>
+            <h6>Previous Close vs Forecasted Close</h6>
+            <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+            {{'{0:,.2f}'.format(computed_values[{{num}}][2]) }}({{ '{0:,.2f}'.format(computed_values[{{num}}][3]) }}%)</h7>
+            <h8>Model Accuracy <img src="../images/rank1.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
           </stock-card>
           {% set num = num + 1 %}
         {% endfor %}

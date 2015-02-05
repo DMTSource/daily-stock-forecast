@@ -27,7 +27,7 @@ class Forecast(ndb.Model):
 
     #Indexed items, dat, symbol, and company name(for search)
     date                     = ndb.DateTimeProperty(auto_now_add=True)
-    rank                     = ndb.IntegerProperty()
+    rank                     = ndb.IntegerProperty(indexed=True)
     symbol                   = ndb.StringProperty(indexed=True) 
     company                  = ndb.StringProperty(indexed=True)
     exchange                 = ndb.StringProperty(indexed=True, choices=set(["NASDAQ", "NYSE", "AMEX"]))
@@ -64,6 +64,11 @@ class Forecast(ndb.Model):
     highPredSlope            = ndb.FloatProperty(validator=roundValue)
     lowPredSlope             = ndb.FloatProperty(validator=roundValue)
     volumePredSlope          = ndb.FloatProperty(validator=roundValue)
+
+    openModelAccuracy        = ndb.IntegerProperty()
+    closeModelAccuracy       = ndb.IntegerProperty()
+    highModelAccuracy        = ndb.IntegerProperty()
+    lowModelAccuracy         = ndb.IntegerProperty()
 
     """#computed values(check docs for better cv)
     

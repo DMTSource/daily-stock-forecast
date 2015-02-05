@@ -15,6 +15,7 @@
 # limitations under the License.
 
 from lib.Forecast import Forecast
+from lib.StockList import StockList
 
 import numpy as np
 
@@ -25,7 +26,7 @@ def InjectTestData():
     #init a new forecast object, fill it with anything
     newForcast = Forecast(
     rank                     = 1,
-    symbol                   = "Goog",
+    symbol                   = "GOOG",
     company                  = "Google, Inc.",
     exchange                 = "NASDAQ",
     industry                 = "Technology",
@@ -64,6 +65,11 @@ def InjectTestData():
     lowPredSlope                = 1.0 + (np.random.ranf(1)[0] - 0.5)/10.0,
     volumePredSlope             = 1.0 + (np.random.ranf(1)[0] - 0.5)/10.0,
 
+    openModelAccuracy = 1,
+    closeModelAccuracy = 2,
+    highModelAccuracy = 2,
+    lowModelAccuracy = 3
+
     )
 
     """#computed values(check docs for better cv)
@@ -93,6 +99,16 @@ def InjectTestData():
 
     #enter the new data
     newForcast.put()
+
+    newStockList = StockList(
+    rank                     = 1,
+    symbol                   = "GOOG",
+    company                  = "Google, Inc.",
+    exchange                 = "NASDAQ",
+    currentPrice             = 524.98,
+    forecastedPrice          = 525.02,
+    modelAccuracy            = 1)
+    newStockList.put()
 
     #self.redirect('./')
 

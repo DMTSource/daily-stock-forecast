@@ -28,7 +28,7 @@ def GetStockDataWithThreading(symbol, index, d1, d2, quotes, symbols, names, ful
 
 
 
-def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False):
+def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False):
     """
     Download historical daily data from yahoo finance
   
@@ -68,6 +68,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
     quotes      = np.empty((len(fullSymbols),1), dtype=object)
     symbols     = np.empty((len(fullSymbols),1), dtype=object)
     names       = np.empty((len(fullSymbols),1), dtype=object)
+    exchanges   = np.copy(fullExchange)
     sectors     = np.copy(fullSector)
     industries  = np.copy(fullIndustry)
     badDataIndx = np.empty((len(fullSymbols),), dtype=int)
@@ -140,6 +141,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
     quotes = list(quotes)
     symbols = np.delete(symbols,badDataIndx)
     names   = np.delete(names,badDataIndx)
+    exchanges = np.delete(exchanges,badDataIndx)
     sectors = np.delete(sectors,badDataIndx)
     industries = np.delete(industries,badDataIndx)
     print "Failed to download %d of %d symbols"%(len(badDataIndx), len(fullSymbols))
@@ -148,7 +150,10 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
     #Covert to vertical array(ease of use for numpy and machine learning)
     symbols = np.array(symbols).T
     names   = np.array(names).T
-
+    exchanges  = np.array(exchanges).T
+    sectors  = np.array(sectors).T
+    industries  = np.array(industries).T
+    
     print "Completing historical download."
 
     #remove none types
@@ -166,8 +171,9 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
-        industries = np.delete(industries,badDatbadIndexaIndx)
+        industries = np.delete(industries,badIndex)
     #
     print "NoneType returned for %d of %d symbols"%(counterBadDim1, len(fullSymbols))
 
@@ -188,6 +194,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
@@ -210,6 +217,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
@@ -230,6 +238,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
@@ -250,6 +259,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
@@ -270,6 +280,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
             temp += 1
         symbols = np.delete(symbols,badIndex)
         names   = np.delete(names,badIndex)
+        exchanges = np.delete(exchanges,badIndex)
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
@@ -308,4 +319,4 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullSector, fullIndustry, dat
         volume.append(q.volume)
     volume = np.array(volume)
 
-    return symbols, names, sectors, industries, dates, high, low, openPrice, closePrice, volume
+    return symbols, names, exchanges, sectors, industries, dates, high, low, openPrice, closePrice, volume

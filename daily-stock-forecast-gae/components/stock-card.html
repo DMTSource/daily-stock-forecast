@@ -19,10 +19,10 @@
     }
     polyfill-next-selector { content: '.card-header img'; }
     .card-header ::content img {
-      width: 70px;
-      height: 70px;
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
-      margin: 10px;
+      margin: 5px;
     }
     polyfill-next-selector { content: '.card-header h1'; }
     .card-header ::content h1 {
@@ -33,7 +33,8 @@
     polyfill-next-selector { content: '.card-header h2'; }
     .card-header ::content h2 {
       margin: 0;
-      font-size: 1.8rem;
+      line-height: 25px;
+      font-size: 1.5rem;
       font-weight: 300;
     }
     polyfill-next-selector { content: '.card-header h3'; }
@@ -45,33 +46,39 @@
     polyfill-next-selector { content: '.card-header h4'; }
     .card-header ::content h4 {
       margin: 0;
+      font-size: 0.70rem;
+      font-weight: 300;
+    }
+     polyfill-next-selector { content: '.card-header h5'; }
+    .card-header ::content h5 {
+      margin: 0;
       font-size: 0.75rem;
       font-weight: 300;
     }
-    polyfill-next-selector { content: '.card-header h5'; }
-    .card-header ::content h5 {
-      margin: 0;
-      font-size: 0.7rem;
-      color: #D7D7D7;
-      font-weight: 400;
-    }
     polyfill-next-selector { content: '.card-header h6'; }
     .card-header ::content h6 {
-      margin: 2px;
-      font-size: 1.8rem;
-      color: #4CAE50;
+      margin: 0;
+      font-size: 0.5rem;
+      color: #D7D7D7;
       font-weight: 400;
     }
     polyfill-next-selector { content: '.card-header h7'; }
-    .card-header ::content h7{
+    .card-header ::content h7 {
+      margin: 2px;
+      font-size: 1.5rem;
+      color: #4CAE50;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h8'; }
+    .card-header ::content h8{
       margin: 0;
       color: #D7D7D7;
-      font-size: 0.6rem;
+      font-size: 0.4rem;
       font-weight: 400;
     }
     .close-change{
       /*width:250px;*/
-      margin-right: 50px;
+      margin-right: 5%;
     }
     core-icon-button {
       position: absolute;
@@ -85,6 +92,29 @@
     paper-ripple{
       color:#2196F3;
     }
+    @media (min-width: 650px) {
+      .close-change{
+        margin-right: 10%;
+      }
+      .card-header ::content img {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        margin: 10px;
+      }
+      .card-header ::content h2 {
+        font-size: 1.8rem;
+      }
+      .card-header ::content h6 {
+        font-size: 0.7rem;
+      }
+      .card-header ::content h7 {
+        font-size: 1.8rem;
+      }
+      .card-header ::content h8{
+        font-size: 0.6rem;
+      }
+    }
     </style>
 
     <div class="card-header" layout horizontal center>
@@ -95,11 +125,12 @@
         <content select="h2"></content>
         <content select="h3"></content>
         <content select="h4"></content>
+        <content select="h5"></content>
       </div>
       <div class="close-change" layout Vertical center>
-        <content select="h5"></content>  
         <content select="h6"></content>  
         <content select="h7"></content>  
+        <content select="h8"></content>  
       </div>
     </div>
     <core-icon-button id="favicon" icon="star" on-tap="{{favoriteTapped}}"></core-icon-button> 

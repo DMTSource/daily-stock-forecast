@@ -44,8 +44,14 @@ handlers:
   script: cleards.app
   login: admin
 
+- url: /symbol/(.*)
+  script: dailystockquant.app
+
+- url: /markets
+  script: dailystockquant.app
+
 - url: /.*
-  script: dailystockquant.application
+  script: dailystockquant.app
 
 # [START libraries]
 libraries:

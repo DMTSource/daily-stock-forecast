@@ -1,0 +1,142 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="stock-price">
+  <template>
+    <style>
+    :host {
+      display: block;
+      position: relative;
+      background-color: white;
+      padding: 5px;
+      width: 100%;
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+    .card-header {
+      margin-bottom: 0px;
+    }
+   
+    paper-ripple{
+      color:#2196F3;
+    }
+    polyfill-next-selector { content: '.card-header h1'; }
+    .card-header ::content h1 {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #444444;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h2'; }
+    .card-header ::content h2 {
+      margin: 2px;
+      font-size: 1.1rem;
+      color: #4CAE50;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h3'; }
+    .card-header ::content h3 {
+      margin: 0;
+      margin-bottom: 4px;
+      color: #D7D7D7;
+      font-size: 0.6rem;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h4'; }
+    .card-header ::content h4 {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #444444;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h5'; }
+    .card-header ::content h5 {
+      margin: 2px;
+      font-size: 1.1rem;
+      color: #4CAE50;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h6'; }
+    .card-header ::content h6 {
+      margin: 0;
+      margin-bottom: 4px;
+      color: #D7D7D7;
+      font-size: 0.6rem;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h7'; }
+    .card-header ::content h7 {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #444444;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h8'; }
+    .card-header ::content h8 {
+      margin: 2px;
+      font-size: 1.1rem;
+      color: #4CAE50;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h9'; }
+    .card-header ::content h9 {
+      margin: 0;
+      margin-bottom: 4px;
+      color: #D7D7D7;
+      font-size: 0.6rem;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h10'; }
+    .card-header ::content h10 {
+      margin: 0;
+      font-size: 0.65rem;
+      color: #444444;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h11'; }
+    .card-header ::content h11 {
+      margin: 2px;
+      font-size: 1.1rem;
+      color: #4CAE50;
+      font-weight: 400;
+    }
+    polyfill-next-selector { content: '.card-header h12'; }
+    .card-header ::content h12 {
+      margin: 0;
+      margin-bottom: 4px;
+      color: #D7D7D7;
+      font-size: 0.6rem;
+      font-weight: 400;
+    }
+    
+
+    </style>
+
+    <div class="card-header" layout horizontal center>
+      <div layout vertical center>
+
+        <content select="h1"></content>
+        <content select="h2"></content>
+        <content select="h3"></content>
+
+        <content select="h4"></content>
+        <content select="h5"></content>
+        <content select="h6"></content>
+
+        <content select="h7"></content>
+        <content select="h8"></content>
+        <content select="h9"></content>
+
+        <content select="h10"></content>
+        <content select="h11"></content>
+        <content select="h12"></content>
+
+      </div>
+      <content></content>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    
+  });
+  </script>
+</polymer-element>

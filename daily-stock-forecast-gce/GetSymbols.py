@@ -35,46 +35,61 @@ def GetAllSymbols():
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     #All countries, all 3 exchanges(6,682 as of 12-29-2014)
-    url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?&render=download'
+    #url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?&render=download'
+
+    """if exchange == "ALL":
+        url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?&render=download'
+    elif exchange == "AMEX":
+        url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=AMEX&render=download'
+    elif exchange == "NASDAQ":
+        url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download'
+    elif exchange == "NYSE":
+        url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download'"""
+
+    exchangeURL = {'AMEX':'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=AMEX&render=download',
+                   'NASDAQ':'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download',
+                   'NYSE':'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download'}
 
     #AMEX
     #url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=AMEX&render=download'
+
+    #NASDAQ
+    #url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NASDAQ&render=download'
+
+    #NYSE
+    #url = 'http://www.nasdaq.com/screening/companies-by-industry.aspx?exchange=NYSE&render=download'
     
-    #North America
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&render=download'
-    #United States
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&render=download'
-    #California
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&country=United+States&state=CA&render=download'
-    #Florida
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&country=United+States&state=FL&render=download'
-    #New York
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&country=United+States&state=NY&render=download'
-    #Connecticut
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&country=United+States&state=CT&render=download'
-    #Hawaii
-    #url = 'http://www.nasdaq.com/screening/companies-by-region.aspx?region=North+America&country=United+States&state=HI&render=download'
-    cr = opener.open(url)
 
     #Parse out and form lists of items
     skipFirstLine = True
     symbol_dict = {}
+    exchange_dict = {}
     sector_dict = {}
     industry_dict = {}
-    for line in cr:
-        #Skip first row, it contains the keys
-        if(skipFirstLine):
-            #print line.rstrip()
-            skipFirstLine = False
-        else:
-            #print np.array(line.rstrip().replace("'s","s").replace('"', '').split(','))[[0,1,6,7]]
-            #exit()
-            (key, symbol, sector, industry) =  np.array(line.rstrip().replace("'s","s").replace('"', '').split(','))[[0,1,6,7]]
-            symbol_dict[str(key)] = symbol
-            sector_dict[str(key)] = sector
-            industry_dict[str(key)] = industry
+
+    for exchange in exchangeURL:
+    
+        cr = opener.open(exchangeURL[exchange])
+        
+        for line in cr:
+            #Skip first row, it contains the keys
+            if(skipFirstLine):
+                #print line.rstrip()
+                skipFirstLine = False
+            else:
+                #print np.array(line.rstrip().replace("'s","s").replace('"', '').split(','))[[0,1,6,7]]
+                #exit()
+                (key, symbol, sector, industry) =  np.array(line.rstrip().replace("'s","s").replace('"', '').split(','))[[0,1,6,7]]
+                symbol_dict[str(key)]   = symbol
+                exchange_dict[str(key)] = exchange
+                sector_dict[str(key)]   = sector
+                industry_dict[str(key)] = industry
 
     print "%d symbols in Universe."%(len(symbol_dict))
     
     #return the tranposed arrays
-    return np.array(list(symbol_dict.keys())).T, np.array(list(symbol_dict.values())).T, np.array(list(sector_dict.values())).T, np.array(list(industry_dict.values())).T 
+    return np.array(list(symbol_dict.keys())).T, \
+           np.array(list(symbol_dict.values())).T, \
+           np.array(list(exchange_dict.values())).T, \
+           np.array(list(sector_dict.values())).T, \
+           np.array(list(industry_dict.values())).T 
