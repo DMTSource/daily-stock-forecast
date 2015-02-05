@@ -16,6 +16,7 @@
   <link rel="import" href="../bower_components/core-icons/core-icons.html">
   <link rel="import" href="../bower_components/core-icons/device-icons.html">
   <link rel="import" href="../bower_components/core-menu/core-menu.html">
+  <link rel="import" href="../bower_components/core-input/core-input.html">
   <link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
   <link rel="import" href="../bower_components/paper-menu-button/paper-menu-button.html">
   <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
@@ -23,6 +24,7 @@
   <link rel="import" href="../bower_components/paper-dropdown/paper-dropdown.html">
   <link rel="import" href="../bower_components/paper-item/paper-item.html">
   <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+  <link rel="import" href="../bower_components/paper-input/paper-input.html">
 
   <link rel="import" href="../components/stock-market.html">
 
@@ -127,7 +129,16 @@
       </paper-menu-button>
 
       <paper-menu-button>
-        <paper-icon-button id="searchButton" icon="search"></paper-icon-button>
+        <paper-icon-button id="search-dialog-button" icon="search"></paper-icon-button>
+        <paper-dialog id="search-dialog" heading="Symbol Search" transition="paper-dialog-transition-bottom">
+
+          <form id="search_form" onsubmit="return search();" >
+          <paper-input-decorator id="paper1" label="Enter company symbol">
+            <input id="symbol_search" is="core-input" value="{{symbol_value1}}" committedValue="{{symbol_value2}}" >
+          </paper-input-decorator>
+          </form>
+
+        </paper-dialog>
       </paper-menu-button>
 
       <paper-tabs id="tabs" class="bottom fit" selected="markets" link self-end>
@@ -178,14 +189,31 @@
     //list.show = tabs.selected;
   //});
 
-  document.getElementById('help-dialog-button')
-    .addEventListener('click', function() {
-      console.log('Showing about dialog...');
-      document.getElementById('help-dialog').toggle();
-  });
+    document.getElementById('help-dialog-button')
+      .addEventListener('click', function() {
+        console.log('Showing about dialog...');
+        document.getElementById('help-dialog').toggle();
+    });
 
+    document.getElementById('search-dialog-button')
+      .addEventListener('click', function() {
+        console.log('Showing search dialog...');
+        document.getElementById('search-dialog').toggle();
+    });
   
   </script>
+  <script type="text/javascript">
+    var search_term = document.getElementById('symbol_search');
+    function search() {
+
+      console.log('Searching for: ' + search_term.value);
+
+      window.location.href = '../symbol/' + search_term.value;
+
+      return false;
+    }
+  </script>
+
 </body>
 
 </html>

@@ -98,10 +98,10 @@
     text-decoration: none;
     color: black;
   }
-  help-dialog{
+  .help-dialog{
     max-width: 650px;
   }
-  Search-dialog{
+  .Search-dialog{
     max-width: 650px;
   }
   @media (min-width: 650px) {
@@ -154,7 +154,7 @@
         <paper-icon-button id="search-dialog-button" icon="search"></paper-icon-button>
         <paper-dialog id="search-dialog" heading="Symbol Search" transition="paper-dialog-transition-bottom">
 
-          <form is="ajax-form" action="/symbol/{{symbol_value2}}" method="get">
+          <form id="search_form" onsubmit="return search();" >
           <paper-input-decorator id="paper1" label="Enter company symbol">
             <input id="symbol_search" is="core-input" value="{{symbol_value1}}" committedValue="{{symbol_value2}}" >
           </paper-input-decorator>
@@ -214,26 +214,36 @@
   </core-header-panel>
 
   <script>
-  //var tabs = document.querySelector('paper-tabs');
-  //var list = document.querySelector('stock-list');
+    //var tabs = document.querySelector('paper-tabs');
+    //var list = document.querySelector('stock-list');
 
-  //tabs.addEventListener('core-select', function() {
-    //list.show = tabs.selected;
-  //});
+    //tabs.addEventListener('core-select', function() {
+      //list.show = tabs.selected;
+    //});
 
-  document.getElementById('help-dialog-button')
-    .addEventListener('click', function() {
-      console.log('Showing about dialog...');
-      document.getElementById('help-dialog').toggle();
-  });
+    document.getElementById('help-dialog-button')
+      .addEventListener('click', function() {
+        console.log('Showing about dialog...');
+        document.getElementById('help-dialog').toggle();
+    });
 
-  document.getElementById('search-dialog-button')
-    .addEventListener('click', function() {
-      console.log('Showing search dialog...');
-      document.getElementById('search-dialog').toggle();
-  });
+    document.getElementById('search-dialog-button')
+      .addEventListener('click', function() {
+        console.log('Showing search dialog...');
+        document.getElementById('search-dialog').toggle();
+    });
+  </script>
 
-  
+  <script type="text/javascript">
+    var search_term = document.getElementById('symbol_search');
+    function search() {
+
+      console.log('Searching for: ' + search_term.value);
+
+      window.location.href = './symbol/' + search_term.value;
+
+      return false;
+    }
   </script>
 </body>
 
