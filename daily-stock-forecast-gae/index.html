@@ -16,6 +16,7 @@
   <link rel="import" href="bower_components/core-icons/core-icons.html">
   <link rel="import" href="bower_components/core-icons/device-icons.html">
   <link rel="import" href="bower_components/core-menu/core-menu.html">
+  <link rel="import" href="bower_components/core-input/core-input.html">
   <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
   <link rel="import" href="bower_components/paper-menu-button/paper-menu-button.html">
   <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
@@ -23,6 +24,7 @@
   <link rel="import" href="bower_components/paper-dropdown/paper-dropdown.html">
   <link rel="import" href="bower_components/paper-item/paper-item.html">
   <link rel="import" href="bower_components/paper-fab/paper-fab.html">
+  <link rel="import" href="bower_components/paper-input/paper-input.html">
 
   <link rel="import" href="components/stock-card.html">
 
@@ -96,6 +98,12 @@
     text-decoration: none;
     color: black;
   }
+  help-dialog{
+    max-width: 650px;
+  }
+  Search-dialog{
+    max-width: 650px;
+  }
   @media (min-width: 650px) {
     .title{
       font-size: 1.0em;
@@ -131,16 +139,6 @@
       <div class="title" flex>Daily Stock Forecast</div>
       
 
-      <paper-menu-button>
-        <paper-icon-button id="settingsButton" icon="settings"></paper-icon-button>
-        <paper-dropdown class="dropdown" halign="right">
-          <core-menu class="menu">
-            <paper-item>Share</paper-item>
-            <paper-item>Settings</paper-item>
-            <paper-item>Feedback</paper-item>
-          </core-menu>
-        </paper-dropdown>
-      </paper-menu-button>
 
       <paper-menu-button>
         <paper-icon-button id="help-dialog-button" icon="help"></paper-icon-button>
@@ -153,7 +151,16 @@
       </paper-menu-button>
 
       <paper-menu-button>
-        <paper-icon-button id="searchButton" icon="search"></paper-icon-button>
+        <paper-icon-button id="search-dialog-button" icon="search"></paper-icon-button>
+        <paper-dialog id="search-dialog" heading="Symbol Search" transition="paper-dialog-transition-bottom">
+
+          <form is="ajax-form" action="/symbol/{{symbol_value2}}" method="get">
+          <paper-input-decorator id="paper1" label="Enter company symbol">
+            <input id="symbol_search" is="core-input" value="{{symbol_value1}}" committedValue="{{symbol_value2}}" >
+          </paper-input-decorator>
+          </form>
+
+        </paper-dialog>
       </paper-menu-button>
 
       <paper-tabs id="tabs" class="bottom fit" selected="all" link self-end>
@@ -218,6 +225,12 @@
     .addEventListener('click', function() {
       console.log('Showing about dialog...');
       document.getElementById('help-dialog').toggle();
+  });
+
+  document.getElementById('search-dialog-button')
+    .addEventListener('click', function() {
+      console.log('Showing search dialog...');
+      document.getElementById('search-dialog').toggle();
   });
 
   

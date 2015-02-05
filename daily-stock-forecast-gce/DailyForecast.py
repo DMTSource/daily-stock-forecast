@@ -128,7 +128,7 @@ if __name__ == "__main__":
                                            (endOfHistoricalDate.month,
                                             endOfHistoricalDate.day,
                                             endOfHistoricalDate.year),
-                                           priceFilterLow=0.10,
+                                           priceFilterLow=1.0,
                                            priceFilterHigh=1e6,
                                            minVolume=10000.0,
                                            useThreading=True)
