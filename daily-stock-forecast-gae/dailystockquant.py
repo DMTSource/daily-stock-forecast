@@ -110,11 +110,12 @@ class Markets(webapp2.RequestHandler):
             timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
         #
 
+        stockList = Forecast.query(StockList.rank.IN([1]))
+        
         #Init items using info from forecast, just use the first item
         dayOfForecast = now.strftime("%A, %B %d %Y")
         dof = now
         for forecast in stockList:
-            validationPlotData = np.zeros((stockList.count(), len(forecast.lowPriceHistory), 10), object)
             dayOfForecast = forecast.date.strftime("%A, %B %d %Y")
             dof = forecast.date
             break
@@ -127,10 +128,10 @@ class Markets(webapp2.RequestHandler):
             url_linktext = 'Sign Up for Updates'
 
         template_values = {
-            'stock_list':stockList,
-            'forecast_data':forecastPlotData,
-            'validation_data':validationPlotData,
-            'computed_values':computedValued,
+            #'stock_list':stockList,
+            #'forecast_data':forecastPlotData,
+            #'validation_data':validationPlotData,
+            #'computed_values':computedValued,
             #'forecast_count':forecastCount,
             'timeStr':timeString,
             'dayOfForecast':dayOfForecast,
