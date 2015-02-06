@@ -32,7 +32,8 @@ handlers:
 
 - url: /testData
   script: testData.application
-
+  login: admin
+  
 - url: /forecast
   script: forecast.app
   login: admin

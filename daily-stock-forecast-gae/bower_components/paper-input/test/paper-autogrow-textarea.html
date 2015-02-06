@@ -10,7 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>paper-autogrow-textarea</title>
+  <title>paper-autogrow-textarea tests</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
   <script src="../../webcomponentsjs/webcomponents.js"></script>
@@ -122,6 +122,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       test('mirror text is visibility:hidden', function() {
         assert.equal(getComputedStyle(a1.$.mirror).visibility, 'hidden');
+      });
+
+      test('grows with a long word', function(done) {
+        var h1 = a1.offsetHeight;
+
+        t1.value = Array(1000).join("P");
+        dispatchInputEvent(t1);
+
+        flush(function() {
+          var h2 = a1.offsetHeight;
+          assert.ok(h2 > h1);
+          assert.deepEqual(a1.getBoundingClientRect(), t1.getBoundingClientRect());
+          done();
+        });
       });
 
     });

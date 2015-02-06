@@ -77,6 +77,7 @@ To change the ink ripple color:
 @group Paper Elements
 @element paper-tabs
 @extends core-selector
+@mixins Polymer.CoreResizable https://github.com/polymer/core-resizable
 @homepage github.io
 -->
 
@@ -229,7 +230,7 @@ To change the ink ripple color:
       var tc = this.$.tabsContainer;
       var l = tc.scrollLeft;
       this.leftHidden = l === 0;
-      this.rightHidden = l === (tc.scrollWidth - tc.clientWidth);
+      this.rightHidden = l === Math.max(0, (tc.scrollWidth - tc.clientWidth));
     },
     
     holdLeft: function() {

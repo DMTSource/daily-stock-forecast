@@ -28,8 +28,12 @@
 
   scope.Animation = function(target, effect, timingInput) {
     this.target = target;
-    // TODO: Make modifications to specified update the underlying player
+
+    // TODO: Store a clone, not the same instance.
+    this._timingInput = timingInput;
     this._timing = shared.normalizeTimingInput(timingInput);
+
+    // TODO: Make modifications to timing update the underlying player
     this.timing = shared.makeTiming(timingInput);
     // TODO: Make this a live object - will need to separate normalization of
     // keyframes into a shared module.
@@ -47,14 +51,14 @@
     return scope.timeline.play(new scope.Animation(this, effect, timing));
   };
 
-  var nullTarget = document.createElement('div');
+  var nullTarget = document.createElementNS('http://www.w3.org/1999/xhtml', 'div');
   scope.newUnderlyingPlayerForAnimation = function(animation) {
     var target = animation.target || nullTarget;
     var effect = animation._effect;
     if (typeof effect == 'function') {
       effect = [];
     }
-    return originalElementAnimate.apply(target, [effect, animation.timing]);
+    return originalElementAnimate.apply(target, [effect, animation._timingInput]);
   };
 
   scope.bindPlayerForAnimation = function(player) {
@@ -94,7 +98,7 @@
 
   // TODO: Call into this less frequently.
   scope.Player.prototype._updateChildren = function() {
-    if (this.startTime === null || !this.source || !this._isGroup)
+    if (this.paused || !this.source || !this._isGroup)
       return;
     var offset = this.source._timing.delay;
     for (var i = 0; i < this.source.children.length; i++) {
@@ -103,14 +107,19 @@
 
       if (i >= this._childPlayers.length) {
         childPlayer = window.document.timeline.play(child);
-        child.player = this.source.player;
         this._childPlayers.push(childPlayer);
       } else {
         childPlayer = this._childPlayers[i];
       }
+      child.player = this.source.player;
 
       if (childPlayer.startTime != this.startTime + offset) {
-        childPlayer.startTime = this.startTime + offset;
+        if (this.startTime === null) {
+          childPlayer.currentTime = this.source.player.currentTime - offset;
+          childPlayer._startTime = null;
+        } else {
+          childPlayer.startTime = this.startTime + offset;
+        }
         childPlayer._updateChildren();
       }
 
@@ -132,4 +141,4 @@
 
   scope.groupChildDuration = groupChildDuration;
 
-}(webAnimationsShared, webAnimationsMaxifill, webAnimationsTesting));
+}(webAnimationsShared, webAnimationsNext, webAnimationsTesting));
