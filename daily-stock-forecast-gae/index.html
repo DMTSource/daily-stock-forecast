@@ -98,11 +98,11 @@
     text-decoration: none;
     color: black;
   }
-  .help-dialog{
-    max-width: 650px;
+  help-dialog{
+    width: 100%;
   }
-  .Search-dialog{
-    max-width: 650px;
+  Search-dialog{
+    width: 100%;
   }
   @media (min-width: 650px) {
     .title{
@@ -125,7 +125,6 @@
       color:#A6D5FA;
       display: inline;
     }
-
   }
   </style>
 
@@ -166,7 +165,7 @@
       <paper-tabs id="tabs" class="bottom fit" selected="all" link self-end>
         <paper-tab name="all"><a class="linkTab" href="./">Top 25</a></paper-tab>
         <paper-tab name="favorites"><a class="linkTab" href="../">My Stocks</a></paper-tab>
-        <paper-tab name="markets"><a class="linkTab" href="/markets">Markets</a></paper-tab>
+        <paper-tab name="markets"><a class="linkTab" href="/markets">Exchanges</a></paper-tab>
       </paper-tabs>
 
       <div class="bottom fit" id="currentTime">{{ timeStr }}</div>
@@ -192,7 +191,7 @@
               <h2>{{stock.symbol}}</h2>
               <h3>{{stock.company}}</h3>
               <h4>{{stock.exchange}}</h4>
-              <h5>${{stock.currentPrice}} -> ${{stock.forecastedPrice}}</h5>
+              <h5>{{stock.currentPrice}} - {{stock.forecastedPrice}}</h5>
               <h6>Forecasted Close vs Previous Close</h6>
               {% if computed_values[num][0] > 0.0 %}
               <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
@@ -214,6 +213,7 @@
   </core-header-panel>
 
   <script>
+    window.scrollTo(0, 1);
     //var tabs = document.querySelector('paper-tabs');
     //var list = document.querySelector('stock-list');
 

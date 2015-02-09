@@ -144,7 +144,7 @@
       <paper-tabs id="tabs" class="bottom fit" selected="markets" link self-end>
         <paper-tab name="all"><a class="link" href="../">Top 25</a></paper-tab>
         <paper-tab name="favorites"><a class="link" href="../">My Stocks</a></paper-tab>
-        <paper-tab name="markets"><a class="link" href="/markets">Markets</a></paper-tab>
+        <paper-tab name="markets"><a class="link" href="/markets">Exchanges</a></paper-tab>
       </paper-tabs>
 
       <div class="bottom fit" id="currentTime">{{ timeStr }}</div>
@@ -157,22 +157,22 @@
       
       <div id="cardHolder" layout vertical center>
         <stock-market>
-        <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NYSE.png" />
-        <img style="width: 500px;height: 250px;margin: 5px;" src="http://chart.finance.yahoo.com/z?s=^nya&t=1d&q=l&l=on&z=s&p=m3,e10"/>
+          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NYSE.png" />
+          <img style="width: 500px;height: 250px;margin: 5px;" src="http://chart.finance.yahoo.com/z?s=^nya&t=1d&q=l&l=on&z=m&p=m3,e10"/>
         </stock-market>
       </div>
 
       <div id="cardHolder" layout vertical center>
         <stock-market>
-        <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NASDAQ.png" />
-        <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^ixic&t=1d&q=l&l=on&z=s&p=m3,e10"/>
+          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NASDAQ.png" />
+          <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^ixic&t=1d&q=l&l=on&z=m&p=m3,e10"/>
         </stock-market>
       </div>
       
       <div id="cardHolder" layout vertical center>
         <stock-market>
-        <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/AMEX.png" />
-        <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^xax&t=1d&q=l&l=on&z=s&p=m3,e10"/>
+          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/AMEX.png" />
+          <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^xax&t=1d&q=l&l=on&z=m&p=m3,e10"/>
         </stock-market>
       </div>
 
@@ -182,6 +182,7 @@
   </core-header-panel>
 
   <script>
+    window.scrollTo(0, 1);
   //var tabs = document.querySelector('paper-tabs');
   //var list = document.querySelector('stock-list');
 

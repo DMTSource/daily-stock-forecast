@@ -1,0 +1,66 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<polymer-element name="stock-corrInfo">
+  <template>
+    <style>
+    :host {
+      display: block;
+      position: relative;
+      width: 100%;
+    }
+    .card-header {
+      margin-bottom: 0px;
+    }
+    polyfill-next-selector { content: '.card-header h1'; }
+    .card-header ::content h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #444444;
+      font-weight: 400;
+      text-align: left;
+      width: 100%;
+    }
+    polyfill-next-selector { content: '.card-header h2'; }
+    .card-header ::content h2 {
+      margin: 2px;
+      font-size: 0.8rem;
+      color: #4CAE50;
+      font-weight: 400;
+      text-align: right;
+      float: right;
+      width: 100%;
+    }
+    polyfill-next-selector { content: '.card-header h3'; }
+    .card-header ::content h3 {
+      margin: 0;
+      margin-bottom: 5px;
+      width:100%;
+      height:5px;
+      background-color: #4CAE50;
+    }
+    @media (min-width: 650px) {
+      .card-header ::content h1 {
+        font-size: 1.4rem;
+      }
+      .card-header ::content h2 {
+        font-size: 1.0rem;
+      }
+    }
+    </style>
+
+    <div class="card-header" layout vertical center>
+      <div style="width:100%" layout horizontal center>
+        <content select="h1"></content>
+        <content select="h2"></content>
+      </div>
+      <div style="width:100%">
+        <content select="h3"></content>
+      </div>
+    </div>
+  </template>
+  <script>
+  Polymer({
+    
+  });
+  </script>
+</polymer-element>

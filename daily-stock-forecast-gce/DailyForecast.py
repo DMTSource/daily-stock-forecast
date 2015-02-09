@@ -243,17 +243,20 @@ if __name__ == "__main__":
 
     #Get the rank of each stock, measure the price diff between open & close and rank
     rankItems = []
+    rankScore = []
     for i in np.arange(len(symbols)):
-        #print percentDiff(np.array(savedPrediction[symbols[i]])[:,CLOSE][-1], np.array(savedPrediction[symbols[i]])[:,OPEN][-1])
-        #rank by diff of pred open vs pred close
-        #rank.append(percentDiff(np.array(savedPrediction[symbols[i]])[:,CLOSE][-1], np.array(savedPrediction[symbols[i]])[:,OPEN][-1]))
-        #rank by diff of previous close to pred close
-        #rankItems.append(percentDiff(np.array(savedPrediction[symbols[i]])[:,CLOSE][-1], closePrice[i][-1]))
         rankItems.append(abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0))
-        #print "%s close change: %0.2f"%(symbols[i],percentDiff(closePrice[i][-1], np.array(savedPrediction[symbols[i]])[:,CLOSE][-1]))
-    #rank = np.array(sorted(rankItems, key=float, reverse=True))+1
-    #print np.array(rankItems).max(), np.array(rankItems).min()
+        R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
+        slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
+        if np.mean([R2,slope]) >= 0.95:
+            rankScore.append(1)
+        elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:
+            rankScore.append(2)
+        else:
+            rankScore.append(3)
     rankIndex = np.array(rankItems).argsort()[::-1]
+    rankScore = np.array(rankScore)
+
     rank = {}
     counter = 1
     for i in rankIndex:
@@ -437,7 +440,7 @@ if __name__ == "__main__":
                 AddFloatToDS(entity, 'forecastedPrice', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
 
                 R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
-                slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
+                slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
                 if np.mean([R2,slope]) >= 0.95:
                     AddIntToDS(entity, 'modelAccuracy', 1)
                 elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:

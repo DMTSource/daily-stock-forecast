@@ -2,9 +2,6 @@
 #
 # Copyright 2014 DMT SOURCE, LLC.
 #
-# This sytem is designed to perform the TishlerHarper tensor difference analysis
-# on a dataset of gaussian outout files intended for structual analysis
-#
 #
 #     DMTSOURCE.COM | CONTACT: DEREK M TISLER lstrdean@gmail.com
 #
@@ -20,10 +17,6 @@ class StockList(ndb.Model):
 
     def roundValue(self, value):
         return round(value,3)
-
-    """ The purpose of the Forecast class is to store each stocks forecast
-        for each day. This offsets the request burden since we are only
-        storing float data, estimated 65 million items per year."""
 
     #Indexed items, dat, symbol, and company name(for search)
     date                     = ndb.DateTimeProperty(auto_now_add=True)
