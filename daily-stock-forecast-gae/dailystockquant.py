@@ -29,6 +29,7 @@ import time as tt
 
 from lib.Forecast import Forecast
 from lib.StockList import StockList
+from lib.UserProfile import UserProfile
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -55,12 +56,27 @@ class MainPage(webapp2.RequestHandler):
 
         stockList = StockList.query(StockList.rank.IN(list(np.arange(1,26))))
 
-        computedCloseValues = np.zeros((stockList.count(), 2), float)
+        computedCloseValues = np.zeros((stockList.count(), 3), float)
+
+        #createa  binary list of stock list vs user favorite list
+        user = users.get_current_user()
+        if user:
+            up = UserProfile.query(UserProfile.user_id == str(user.user_id()))            
+            favBinary = []
+            for u in up:
+                for stock in stockList:
+                    if stock.symbol in u.favorite_list:
+                        favBinary.append(1)
+                    else:
+                        favBinary.append(0)
+                break
+        #
 
         i = 0
         for stock in stockList:
             computedCloseValues[i][0] = stock.forecastedPrice-stock.currentPrice
             computedCloseValues[i][1] = (stock.forecastedPrice-stock.currentPrice)/abs(stock.currentPrice)*100.0
+            computedCloseValues[i][2] = favBinary[i]
             i += 1
 
         #Init items using info from forecast, just use the first item
@@ -110,7 +126,7 @@ class Markets(webapp2.RequestHandler):
             timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
         #
 
-        stockList = Forecast.query(StockList.rank.IN([1]))
+        stockList = StockList.query(StockList.rank.IN([1]))
         
         #Init items using info from forecast, just use the first item
         dayOfForecast = now.strftime("%A, %B %d %Y")
@@ -252,8 +268,124 @@ class SymbolHandler(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('symbol.html')
         self.response.write(template.render(template_values))
 
+class FavoiteHandler(webapp2.RequestHandler):
+
+    def get(self, stock_symbol):
+
+        #make symbol all caps
+        stock_symbol = stock_symbol.upper() 
+        
+        # Checks for active Google account session
+        user = users.get_current_user()
+
+        if user:
+
+            #Get the users list of favorite stocks
+            up = UserProfile.query(UserProfile.user_id == str(user.user_id()))
+            
+            # If new user, make profile
+            if up.count() == 0:
+                UserProfile(nickname           = str(user.nickname()),
+                                 email              = str(user.email()),
+                                 user_id            = str(user.user_id()),
+                                 federated_identity = str(user.federated_identity()),
+                                 federated_provider = str(user.federated_provider()),
+                                 favorite_list      = []).put()
+                up = UserProfile.query(UserProfile.user_id == str(user.user_id()))
+            else:
+                for u in up:
+                    #Update last login date
+                    u.last_login_date = datetime.now()
+                    #update user email if changed
+                    if user.email != u.email:
+                        u.email = str(user.email())
+                
+            
+            #optinal:Remove the stock if its in the list, otherwise add it
+            for u in up:
+                if stock_symbol != '':
+                    if stock_symbol in u.favorite_list:
+                        u.favorite_list.remove(stock_symbol)
+                    else:
+                        u.favorite_list.append(stock_symbol)
+
+            #commit the changes
+            for u in up:
+                u.put()
+
+
+            #Form the symbol list to query
+            queryList = []
+            for u in up:
+                for item in u.favorite_list:
+                    queryList.append(item)
+            
+                
+            #Get the time, make a string of format:
+            #Tue, Jan 6, 2014, 12:00AM EST - US MARKETS CLOSED
+            now = datetime.now(tz=timezone('US/Eastern'))
+            #Construct the EST time for the top of page
+            if( (now.time() >= time(9,30) and now.time() <= time(16,30)) and (now.weekday() <= 4 ) ):
+                timeString = "{0:s} EST  - US Markets Are Open".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
+            else:
+                timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
+            #
+
+            stockList = StockList.query(StockList.symbol.IN(queryList))
+
+            #prevent empty query from causing crashes
+            if len(queryList)==0:
+                stockList = []
+
+            #Get computed values
+            if len(queryList)!=0:
+                computedCloseValues = np.zeros((stockList.count(), 2), float)
+            else:
+                computedCloseValues = np.zeros((0, 2), float)
+            i = 0
+            if len(queryList)!=0:
+                for stock in stockList:
+                    computedCloseValues[i][0] = stock.forecastedPrice-stock.currentPrice
+                    computedCloseValues[i][1] = (stock.forecastedPrice-stock.currentPrice)/abs(stock.currentPrice)*100.0
+                    i += 1
+
+            #Init items using info from forecast, just use the first item
+            dayOfForecast = now.strftime("%A, %B %d %Y")
+            dof = now
+            if stock_symbol != '':
+                for stock in stockList:
+                    dayOfForecast = stock.date.strftime("%A, %B %d %Y")
+                    #dof = forecast.date
+                    break
+            
+            if users.get_current_user():
+                url = users.create_logout_url(self.request.uri)
+                url_linktext = 'Logout'
+            else:
+                url = users.create_login_url(self.request.uri)
+                url_linktext = 'Sign Up for Updates'
+
+            template_values = {
+                'stock_list':stockList,
+                'computed_values':computedCloseValues,
+                #'forecast_count':forecastCount,
+                'timeStr':timeString,
+                'dayOfForecast':dayOfForecast,
+                'url': url,
+                'url_linktext': url_linktext,
+            }
+
+            #Show mystock page
+            template = JINJA_ENVIRONMENT.get_template('mystocks.html')
+            self.response.write(template.render(template_values))
+        else:
+            #redirect to a login page to authenticate google user
+            self.redirect(users.create_login_url(self.request.uri))
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/markets', Markets),
-    ('/symbol/(.*)', SymbolHandler)
+    ('/symbol/(.*)', SymbolHandler),
+    ('/favorite/(.*)', FavoiteHandler)
+    
 ], debug=True)

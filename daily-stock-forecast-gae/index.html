@@ -145,7 +145,7 @@
         <paper-dialog style="width:75%;" id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
           <p flex>Daily Stock Forecast is a free service for day trading professionals created by <a target="_blank" href="http://www.linkedin.com/in/derekmtishler">Derek M Tishler</a>.Using historical stock prices and machine learning, DSF forecasts the next day's open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon). It offers full exposure of the model's past 90 day performance for each stock via performance correlation with actual prices.</p>
           <p><strong>Technology</strong><br />
-          Daily Stock Forecast is powered by <a target="_blank" href="https://www.polymer-project.org/">Polymer</a>, <a target="_blank" href="https://cloud.google.com/appengine/">Google App Engine</a>, <a target="_blank" href="https://cloud.google.com/compute/">Google Compute Engine</a>,<a target="_blank" href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>, <a target="_blank" href="https://www.python.org/">Python 2.7</a>, <a target="_blank" href="http://scikit-learn.org/">Scikit-Learn</a>, <a target="_blank" href="http://www.numpy.org/">Numpy</a>, <a target="_blank" href="https://code.google.com/p/yahoo-finance-managed/">Yahoo!Managed</a>, and many more. Daily stock lists and historical data are obtained from the <a target="_blank" href="http://www.nasdaq.com/screening/company-list.aspx">Nasqac Company List</a> and <a target="_blank" href="http://finance.yahoo.com/">Yahoo Finance.</a></p>
+          Daily Stock Forecast is powered by <a target="_blank" href="https://www.polymer-project.org/">Polymer</a>, <a target="_blank" href="https://cloud.google.com/appengine/">Google App Engine</a>, <a target="_blank" href="https://cloud.google.com/compute/">Google Compute Engine</a>,<a target="_blank" href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>, <a target="_blank" href="https://www.python.org/">Python 2.7</a>, <a target="_blank" href="http://scikit-learn.org/">Scikit-Learn</a>, <a target="_blank" href="http://www.numpy.org/">Numpy</a>, <a target="_blank" href="https://code.google.com/p/yahoo-finance-managed/">Yahoo!Managed</a>, and many more. Daily stock lists and historical data are obtained from the <a target="_blank" href="http://www.nasdaq.com/screening/company-list.aspx">Nasdaq Company List</a> and <a target="_blank" href="http://finance.yahoo.com/">Yahoo Finance.</a></p>
           <p><strong>Disclaimer</strong><br />This site and the generated forecasts are not inventment advice. Use at your own risk/discretion.</p>
         </paper-dialog>
       </paper-menu-button>
@@ -165,7 +165,7 @@
 
       <paper-tabs id="tabs" class="bottom fit" selected="all" link self-end>
         <paper-tab name="all"><a class="linkTab" href="./">Top 25</a></paper-tab>
-        <paper-tab name="favorites"><a class="linkTab" href="../">My Stocks</a></paper-tab>
+        <paper-tab name="favorites"><a class="linkTab" href="/favorite/">My Stocks</a></paper-tab>
         <paper-tab name="markets"><a class="linkTab" href="/markets">Exchanges</a></paper-tab>
       </paper-tabs>
 
@@ -182,10 +182,7 @@
         <a id="linkStockCard" href="/symbol/{{stock.symbol}}">
           <div id="cardHolder" layout vertical center>
             {% raw %}
-            <stock-card
-              favorite="false"
-              on-favorite-tap="{{handleFavorite}}"
-              hidden?="{{show == 'favorites' && !false}}">
+            <stock-card>
             {% endraw %}
               <img src="../images/{{stock.exchange}}.png" />
               <h1>#{{stock.rank}}</h1>
@@ -195,13 +192,18 @@
               <h5>{{stock.currentPrice}} - {{stock.forecastedPrice}}</h5>
               <h6>Forecasted Close vs Previous Close</h6>
               {% if computed_values[num][0] > 0.0 %}
-              <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+                <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
               {{'{0:,.2f}'.format(computed_values[num][0]) }}({{ '{0:,.2f}'.format(computed_values[num][1]) }}%)</h7>
               {% else %}
-              <h7 style="color:#F44336;"><img src="../images/downarrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+                <h7 style="color:#F44336;"><img src="../images/downarrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][0]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][1]) }}%)</h7>
               {% endif %}
-              <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
+                <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
+              {% if computed_values[num][2] == 0 %}
+                <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #636363;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+              {% else %}
+                <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #FFC107;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+              {% endif %}
             </stock-card>
             {% set num = num + 1 %}
           </div>

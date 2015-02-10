@@ -4,7 +4,7 @@
 <head>
 
   <title>Daily Stock Forecast</title>
-  <link rel="icon" type="image/png"  href="../favicon.png" />
+  <link rel="icon" type="image/png"  href="..//favicon.png" />
 
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
 
@@ -26,6 +26,7 @@
   <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
   <link rel="import" href="../bower_components/paper-input/paper-input.html">
 
+  <link rel="import" href="../components/stock-card.html">
   <link rel="import" href="../components/stock-market.html">
 
   <style>
@@ -44,6 +45,10 @@
     background: #2196F3;
     color: white;
   }
+  .title{
+      font-size: 0.6em;
+      font-weight: 400;
+    }
   #tabs {
     width: 100%;
     margin: 0;
@@ -80,16 +85,31 @@
   #cardHolder{
     width: 100%;
   }
-  stock-market {
+  stock-card {
       margin-bottom: 10px;
   }
-  .link{
+  .linkTab{
     text-decoration: none;
     color: white;
     text-align: center; 
     margin-top: 33px;
   }
+  #linkStockCard{
+    width: 100%;
+    text-decoration: none;
+    color: black;
+  }
+  help-dialog{
+    width: 100%;
+  }
+  Search-dialog{
+    width: 100%;
+  }
   @media (min-width: 650px) {
+    .title{
+      font-size: 1.0em;
+      font-weight: 400;
+    }
     #tabs {
       width: 325px;
     }
@@ -116,8 +136,10 @@
 
     <core-toolbar class="medium-tall">
       <core-icon icon="device:multitrack-audio"></core-icon>
-      <div flex>Daily Stock Forecast</div>
+      <div class="title" flex>Daily Stock Forecast</div>
       
+
+
       <paper-menu-button>
         <paper-icon-button id="help-dialog-button" icon="help"></paper-icon-button>
         <paper-dialog style="width:75%;" id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
@@ -141,10 +163,10 @@
         </paper-dialog>
       </paper-menu-button>
 
-      <paper-tabs id="tabs" class="bottom fit" selected="markets" link self-end>
-        <paper-tab name="all"><a class="link" href="../">Top 25</a></paper-tab>
-        <paper-tab name="favorites"><a class="link" href="/favorite/">My Stocks</a></paper-tab>
-        <paper-tab name="markets"><a class="link" href="/markets">Exchanges</a></paper-tab>
+      <paper-tabs id="tabs" class="bottom fit" selected="favorites" link self-end>
+        <paper-tab name="all"><a class="linkTab" href="../">Top 25</a></paper-tab>
+        <paper-tab name="favorites"><a class="linkTab" href="/favorite/">My Stocks</a></paper-tab>
+        <paper-tab name="markets"><a class="linkTab" href="/markets">Exchanges</a></paper-tab>
       </paper-tabs>
 
       <div class="bottom fit" id="currentTime">{{ timeStr }}</div>
@@ -155,27 +177,47 @@
 
       <div class="dateHeader">{{ dayOfForecast }}</div>
       
-      <div id="cardHolder" layout vertical center>
-        <stock-market>
-          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NYSE.png" />
-          <img style="width: 500px;height: 250px;margin: 5px;" src="http://chart.finance.yahoo.com/z?s=^nya&t=1d&q=l&l=on&z=m&p=m3,e10"/>
-        </stock-market>
-      </div>
+      {% set num = 0 %}
+      {% for stock in stock_list %}
+        <a id="linkStockCard" href="/symbol/{{stock.symbol}}">
+          <div id="cardHolder" layout vertical center>
+            {% raw %}
+            <stock-card
+              favorite="false"
+              on-favorite-tap="{{handleFavorite}}"
+              hidden?="{{show == 'favorites' && !false}}">
+            {% endraw %}
+              <img src="../images/{{stock.exchange}}.png" />
+              <h1>#{{stock.rank}}</h1>
+              <h2>{{stock.symbol}}</h2>
+              <h3>{{stock.company}}</h3>
+              <h4>{{stock.exchange}}</h4>
+              <h5>{{stock.currentPrice}} - {{stock.forecastedPrice}}</h5>
+              <h6>Forecasted Close vs Previous Close</h6>
+              {% if computed_values[num][0] > 0.0 %}
+              <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+              {{'{0:,.2f}'.format(computed_values[num][0]) }}({{ '{0:,.2f}'.format(computed_values[num][1]) }}%)</h7>
+              {% else %}
+              <h7 style="color:#F44336;"><img src="../images/downarrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+              {{'{0:,.2f}'.format(-1.0*computed_values[num][0]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][1]) }}%)</h7>
+              {% endif %}
+              <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
+              <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #FFC107;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+              
+            </stock-card>
+            {% set num = num + 1 %}
+          </div>
+        </a>
+      {% endfor %}
 
+      {% if computed_values|length == 0 %}
       <div id="cardHolder" layout vertical center>
-        <stock-market>
-          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/NASDAQ.png" />
-          <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^ixic&t=1d&q=l&l=on&z=m&p=m3,e10"/>
-        </stock-market>
+          <stock-market style="height:200px;text-align:center;vertical-align:middle;">
+            <div style="margin:auto auto auto auto;"><img style="width:50px;margin-top:60px;margin-bottom:10px;" src="/favicon.png"><br />No stocks added yet!</div>
+          </stock-market>
       </div>
+      {% endif %}
       
-      <div id="cardHolder" layout vertical center>
-        <stock-market>
-          <img style="width: 100px;height: 100px;border-radius: 50%;margin: 5px;" src="../images/AMEX.png" />
-          <img style="width: 500px;height: 250px;margin: 5px;"  src="http://chart.finance.yahoo.com/z?s=^xax&t=1d&q=l&l=on&z=m&p=m3,e10"/>
-        </stock-market>
-      </div>
-
     </div>
 
 
@@ -183,12 +225,12 @@
 
   <script>
     window.scrollTo(0, 1);
-  //var tabs = document.querySelector('paper-tabs');
-  //var list = document.querySelector('stock-list');
+    //var tabs = document.querySelector('paper-tabs');
+    //var list = document.querySelector('stock-list');
 
-  //tabs.addEventListener('core-select', function() {
-    //list.show = tabs.selected;
-  //});
+    //tabs.addEventListener('core-select', function() {
+      //list.show = tabs.selected;
+    //});
 
     document.getElementById('help-dialog-button')
       .addEventListener('click', function() {
@@ -201,20 +243,19 @@
         console.log('Showing search dialog...');
         document.getElementById('search-dialog').toggle();
     });
-  
   </script>
+
   <script type="text/javascript">
     var search_term = document.getElementById('symbol_search');
     function search() {
 
       console.log('Searching for: ' + search_term.value);
 
-      window.location.href = '../symbol/' + search_term.value;
+      window.location.href = './symbol/' + search_term.value;
 
       return false;
     }
   </script>
-
 </body>
 
 </html>

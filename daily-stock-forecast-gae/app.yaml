@@ -51,6 +51,9 @@ handlers:
 - url: /markets
   script: dailystockquant.app
 
+- url: /favorite(.*)
+  script: dailystockquant.app
+
 - url: /.*
   script: dailystockquant.app
 
