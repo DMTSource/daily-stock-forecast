@@ -335,10 +335,10 @@
 
       <paper-menu-button>
         <paper-icon-button id="help-dialog-button" icon="help"></paper-icon-button>
-        <paper-dialog id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
-          <p flex>Daily Stock Forecast is a free service for day trading professionals created by <a href="https://www.linkedin.com/profile/view?id=263507105">Derek M Tishler</a>.Using historical stock prices and machine learning, DSF forecasts the next day's open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon). It offers full exposure of the model's past 90 day performance for each stock via performance correlation with actual prices.</p>
+        <paper-dialog style="width:75%;" id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
+          <p flex>Daily Stock Forecast is a free service for day trading professionals created by <a target="_blank" href="http://www.linkedin.com/in/derekmtishler">Derek M Tishler</a>.Using historical stock prices and machine learning, DSF forecasts the next day's open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon). It offers full exposure of the model's past 90 day performance for each stock via performance correlation with actual prices.</p>
           <p><strong>Technology</strong><br />
-          Daily Stock Forecast is powered by <a href="https://www.polymer-project.org/">Polymer</a>, <a href="https://cloud.google.com/appengine/">Google App Engine</a>, <a href="https://cloud.google.com/compute/">Google Compute Engine</a>, and <a href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>.</p>
+          Daily Stock Forecast is powered by <a target="_blank" href="https://www.polymer-project.org/">Polymer</a>, <a target="_blank" href="https://cloud.google.com/appengine/">Google App Engine</a>, <a target="_blank" href="https://cloud.google.com/compute/">Google Compute Engine</a>,<a target="_blank" href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>, <a target="_blank" href="https://www.python.org/">Python 2.7</a>, <a target="_blank" href="http://scikit-learn.org/">Scikit-Learn</a>, <a target="_blank" href="http://www.numpy.org/">Numpy</a>, <a target="_blank" href="https://code.google.com/p/yahoo-finance-managed/">Yahoo!Managed</a>, and many more. Daily stock lists and historical data are obtained from the <a target="_blank" href="http://www.nasdaq.com/screening/company-list.aspx">Nasqac Company List</a> and <a target="_blank" href="http://finance.yahoo.com/">Yahoo Finance.</a></p>
           <p><strong>Disclaimer</strong><br />This site and the generated forecasts are not inventment advice. Use at your own risk/discretion.</p>
         </paper-dialog>
       </paper-menu-button>
@@ -547,7 +547,7 @@
       {% if computed_values|length == 0 %}
       <div id="cardHolder" layout vertical center>
           <stock-market style="height:200px;text-align:center;">
-            <div flex>Symbol not found in forecast datastore.</div>
+            <div style="margin:auto auto auto auto;"><img style="width:50px;margin-top:60px;margin-bottom:10px;" src="/favicon.png"><br />Symbol Not Gound In Forecast Datastore.</div>
           </stock-market>
       </div>
       {% endif %}

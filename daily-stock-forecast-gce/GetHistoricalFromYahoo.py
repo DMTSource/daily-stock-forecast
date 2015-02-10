@@ -227,7 +227,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     counterBadDim4 = 0
     badIndex = []
     for i in np.arange(len(symbols)):
-        if quotes[i].high.mean() < priceFilterLow or quotes[i].high.mean() > priceFilterHigh:
+        if quotes[i].close.min() < priceFilterLow or quotes[i].close.min() > priceFilterHigh:
             badIndex.append(i)
             counterBadDim4 += 1
     if len(badIndex) > 0:
@@ -269,7 +269,7 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     counterBadDim6 = 0
     badIndex = []
     for i in np.arange(len(symbols)):
-        if quotes[i].volume.mean() < minVolume:
+        if quotes[i].volume.min() < minVolume:
             badIndex.append(i)
             counterBadDim6 += 1
     if len(badIndex) > 0:

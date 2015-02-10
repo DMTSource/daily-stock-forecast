@@ -7,8 +7,6 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import sys
 
@@ -31,7 +29,9 @@ from datetime import datetime, time
 import calendar
 import time as tt
 
-import googledatastore as datastore
+import platform
+if platform.system() != 'Windows':
+    import googledatastore as datastore
 
 import logging
 
@@ -128,9 +128,9 @@ if __name__ == "__main__":
                                            (endOfHistoricalDate.month,
                                             endOfHistoricalDate.day,
                                             endOfHistoricalDate.year),
-                                           priceFilterLow=5.0,
+                                           priceFilterLow=1.0,
                                            priceFilterHigh=1e6,
-                                           minVolume=10000.0,
+                                           minVolume=5000.0,
                                            useThreading=True)
     
     #If no stocks in universe, exit
@@ -234,7 +234,7 @@ if __name__ == "__main__":
               4: 'F'
             }[dayInt])
         
-    #Place the item for each stock into the ndb
+    #Easy names for index of prediction array
     OPEN   = 2
     CLOSE  = 3
     HIGH   = 0
@@ -244,6 +244,7 @@ if __name__ == "__main__":
     #Get the rank of each stock, measure the price diff between open & close and rank
     rankItems = []
     rankScore = []
+    rankIndexOriginal = []
     for i in np.arange(len(symbols)):
         rankItems.append(abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0))
         R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
@@ -254,315 +255,342 @@ if __name__ == "__main__":
             rankScore.append(2)
         else:
             rankScore.append(3)
-    rankIndex = np.array(rankItems).argsort()[::-1]
+        rankIndexOriginal.append(i)
+    #rankIndex = np.array(rankItems).argsort()[::-1]
+    rankItems = np.array(rankItems)
     rankScore = np.array(rankScore)
 
+
+    #Get the index of each accuracy group
+    indexRank1 = np.where(rankScore == 1)
+    indexRank2 = np.where(rankScore == 2)
+    indexRank3 = np.where(rankScore == 3)
+    
+    #Sort each accuracy group from high to low close price change
+    sortedIndexRank1 = rankItems[indexRank1].argsort()[::-1]
+    sortedIndexRank2 = rankItems[indexRank2].argsort()[::-1]
+    sortedIndexRank3 = rankItems[indexRank3].argsort()[::-1]
+
+    #Now we can sort the original index list by sliceing with the above groups to save symbol indicies in order of 1,2,3 accuracy
+    sortedRankIndexOriginal = np.zeros(len(rankIndexOriginal))
+    if len(sortedIndexRank1) > 0:
+        sortedRankIndexOriginal[0:len(sortedIndexRank1)] = np.array(rankIndexOriginal)[indexRank1][sortedIndexRank1]
+    if len(sortedIndexRank2) > 0:
+        sortedRankIndexOriginal[len(sortedIndexRank1):len(sortedIndexRank1)+len(sortedIndexRank2)] = np.array(rankIndexOriginal)[indexRank2][sortedIndexRank2]
+    if len(sortedIndexRank3) > 0:
+        sortedRankIndexOriginal[len(sortedIndexRank1)+len(sortedIndexRank2):len(sortedIndexRank1)+len(sortedIndexRank2)+len(sortedIndexRank3)] = np.array(rankIndexOriginal)[indexRank3][sortedIndexRank3]
+
+    #loop through the now sorted index list, and use that to fetch each symbol and apply a rank(ascending).
     rank = {}
+    counter = 1
+    for i in sortedRankIndexOriginal:
+        rank[symbols[i]] = counter
+        counter += 1
+    """rank = {}
     counter = 1
     for i in rankIndex:
         rank[symbols[i]] = counter
         #if counter <= 10:
         #    print symbols[i], counter, abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
-        counter += 1
+        counter += 1"""
     
-    # Set the dataset from the command line parameters.
-    datastore.set_options(dataset="daily-stock-forecast")
-    
-    for i in np.arange(len(symbols)):
-        if(rank[symbols[i]] <= 100000):
-            try:
-                req = datastore.CommitRequest()
-                req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
-                entity = req.mutation.insert_auto_id.add()
+    if platform.system() != 'Windows':
+        # Set the dataset from the command line parameters.
+        datastore.set_options(dataset="daily-stock-forecast")
 
-                # Create a new entity key.
-                key = datastore.Key()
-                
-                # Set the entity key with only one `path_element`: no parent.
-                path = key.path_element.add()
-                path.kind = 'Forecast'
+        #Save each symbol into the datastore
+        for i in np.arange(len(symbols)):
+            if(rank[symbols[i]] <= 100000):
+                try:
+                    req = datastore.CommitRequest()
+                    req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
+                    entity = req.mutation.insert_auto_id.add()
 
-                # Copy the entity key.
-                entity.key.CopyFrom(key)
-                
-                # - a dateTimeValue 64bit integer: `date`
-                prop = entity.property.add()
-                prop.name = 'date'
-                prop.value.timestamp_microseconds_value = long(tt.mktime(dayToPredict.timetuple()) * 1e6)
-                #prop.value.timestamp_microseconds_value = long(tt.time() * 1e6)
+                    # Create a new entity key.
+                    key = datastore.Key()
+                    
+                    # Set the entity key with only one `path_element`: no parent.
+                    path = key.path_element.add()
+                    path.kind = 'Forecast'
 
-                AddIntToDS(entity, 'rank', rank[symbols[i]], True)
-                AddStringToDS(entity, 'symbol', symbols[i], True)
-                AddStringToDS(entity, 'company', names[i], True)
-                AddStringToDS(entity, 'exchange', exchanges[i], True)
-                AddStringToDS(entity, 'sector', sector[i], True)
-                AddStringToDS(entity, 'industry', industry[i], True)
+                    # Copy the entity key.
+                    entity.key.CopyFrom(key)
+                    
+                    # - a dateTimeValue 64bit integer: `date`
+                    prop = entity.property.add()
+                    prop.name = 'date'
+                    prop.value.timestamp_microseconds_value = long(tt.mktime(dayToPredict.timetuple()) * 1e6)
+                    #prop.value.timestamp_microseconds_value = long(tt.time() * 1e6)
 
-                #predictions
-                AddDoubleListToDS(entity, 'openPredPrice', np.array(savedPrediction[symbols[i]])[:,OPEN])
-                AddDoubleListToDS(entity, 'closePredPrice', np.array(savedPrediction[symbols[i]])[:,CLOSE])
-                AddDoubleListToDS(entity, 'highPredPrice', np.array(savedPrediction[symbols[i]])[:,HIGH])
-                AddDoubleListToDS(entity, 'lowPredPrice', np.array(savedPrediction[symbols[i]])[:,LOW])
-                AddDoubleListToDS(entity, 'volumePred', np.array(savedPrediction[symbols[i]])[:,VOLUME])
-                AddStrListToDS(entity, 'dayOfPred', dayOfWeekAsStr)
+                    AddIntToDS(entity, 'rank', rank[symbols[i]], True)
+                    AddStringToDS(entity, 'symbol', symbols[i], True)
+                    AddStringToDS(entity, 'company', names[i], True)
+                    AddStringToDS(entity, 'exchange', exchanges[i], True)
+                    AddStringToDS(entity, 'sector', sector[i], True)
+                    AddStringToDS(entity, 'industry', industry[i], True)
 
-                #History lists
-                #print type(volume[i][0]), type(low[i][0]), float("{0:.2f}".format(volume[i][0]))
-                AddDoubleListToDS(entity, 'openPriceHistory', openPrice[i][-NPredPast+1:])
-                AddDoubleListToDS(entity, 'closePriceHistory', closePrice[i][-NPredPast+1:])
-                AddDoubleListToDS(entity, 'highPriceHistory', high[i][-NPredPast+1:])
-                AddDoubleListToDS(entity, 'lowPriceHistory', low[i][-NPredPast+1:])
-                AddDoubleListToDS(entity, 'volumeHistory', volume[i][-NPredPast+1:])
-#                AddStrListToDS(entity, 'dayOfWeekHistory', dayOfWeekAsStr[:-1])
+                    #predictions
+                    AddDoubleListToDS(entity, 'openPredPrice', np.array(savedPrediction[symbols[i]])[:,OPEN])
+                    AddDoubleListToDS(entity, 'closePredPrice', np.array(savedPrediction[symbols[i]])[:,CLOSE])
+                    AddDoubleListToDS(entity, 'highPredPrice', np.array(savedPrediction[symbols[i]])[:,HIGH])
+                    AddDoubleListToDS(entity, 'lowPredPrice', np.array(savedPrediction[symbols[i]])[:,LOW])
+                    AddDoubleListToDS(entity, 'volumePred', np.array(savedPrediction[symbols[i]])[:,VOLUME])
+                    AddStrListToDS(entity, 'dayOfPred', dayOfWeekAsStr)
 
-                #prediction correlation value, R2
-                #print len(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1]), len(openPrice[i][-NPredPast+1:])
-                openR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1], openPrice[i][-NPredPast+1:])[0][1]
-                AddFloatToDS(entity, 'openPredR2', openR2)
-                closeR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
-                AddFloatToDS(entity, 'closePredR2', closeR2)
-                highR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,HIGH][:-1], high[i][-NPredPast+1:])[0][1]
-                AddFloatToDS(entity, 'highPredR2', highR2)
-                lowR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,LOW][:-1], low[i][-NPredPast+1:])[0][1]
-                AddFloatToDS(entity, 'lowPredR2', lowR2)
-                volR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1]
-                AddFloatToDS(entity, 'volumePredR2', volR2)
+                    #History lists
+                    #print type(volume[i][0]), type(low[i][0]), float("{0:.2f}".format(volume[i][0]))
+                    AddDoubleListToDS(entity, 'openPriceHistory', openPrice[i][-NPredPast+1:])
+                    AddDoubleListToDS(entity, 'closePriceHistory', closePrice[i][-NPredPast+1:])
+                    AddDoubleListToDS(entity, 'highPriceHistory', high[i][-NPredPast+1:])
+                    AddDoubleListToDS(entity, 'lowPriceHistory', low[i][-NPredPast+1:])
+                    AddDoubleListToDS(entity, 'volumeHistory', volume[i][-NPredPast+1:])
+    #                AddStrListToDS(entity, 'dayOfWeekHistory', dayOfWeekAsStr[:-1])
 
-                #prediction correlation slope
-                #print len(openPrice[i][-NPredPast+1:]), len( np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
-                slope, intercept, r_value, p_value, std_err = stats.linregress(openPrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
-                AddFloatToDS(entity, 'openPredSlope', slope)
-                if np.mean([openR2,slope]) >= 0.95:
-                    AddIntToDS(entity, 'openModelAccuracy', 1)
-                elif np.mean([openR2,slope]) < 0.95 and np.mean([openR2,slope]) >= 0.90:
-                    AddIntToDS(entity, 'openModelAccuracy', 2)
-                else:
-                    AddIntToDS(entity, 'openModelAccuracy', 3)
+                    #prediction correlation value, R2
+                    #print len(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1]), len(openPrice[i][-NPredPast+1:])
+                    openR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1], openPrice[i][-NPredPast+1:])[0][1]
+                    AddFloatToDS(entity, 'openPredR2', openR2)
+                    closeR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
+                    AddFloatToDS(entity, 'closePredR2', closeR2)
+                    highR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,HIGH][:-1], high[i][-NPredPast+1:])[0][1]
+                    AddFloatToDS(entity, 'highPredR2', highR2)
+                    lowR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,LOW][:-1], low[i][-NPredPast+1:])[0][1]
+                    AddFloatToDS(entity, 'lowPredR2', lowR2)
+                    volR2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1]
+                    AddFloatToDS(entity, 'volumePredR2', volR2)
 
-                slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-                AddFloatToDS(entity, 'closePredSlope', slope)
-                if np.mean([closeR2,slope]) >= 0.95:
-                    AddIntToDS(entity, 'closeModelAccuracy', 1)
-                elif np.mean([closeR2,slope]) < 0.95 and np.mean([closeR2,slope]) >= 0.90:
-                    AddIntToDS(entity, 'closeModelAccuracy', 2)
-                else:
-                    AddIntToDS(entity, 'closeModelAccuracy', 3)
+                    #prediction correlation slope
+                    #print len(openPrice[i][-NPredPast+1:]), len( np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(openPrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
+                    AddFloatToDS(entity, 'openPredSlope', slope)
+                    if np.mean([openR2,slope]) >= 0.95:
+                        AddIntToDS(entity, 'openModelAccuracy', 1)
+                    elif np.mean([openR2,slope]) < 0.95 and np.mean([openR2,slope]) >= 0.90:
+                        AddIntToDS(entity, 'openModelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'openModelAccuracy', 3)
 
-                slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
-                AddFloatToDS(entity, 'highPredSlope', slope)
-                if np.mean([highR2,slope]) >= 0.95:
-                    AddIntToDS(entity, 'highModelAccuracy', 1)
-                elif np.mean([highR2,slope]) < 0.95 and np.mean([highR2,slope]) >= 0.90:
-                    AddIntToDS(entity, 'highModelAccuracy', 2)
-                else:
-                    AddIntToDS(entity, 'highModelAccuracy', 3)
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
+                    AddFloatToDS(entity, 'closePredSlope', slope)
+                    if np.mean([closeR2,slope]) >= 0.95:
+                        AddIntToDS(entity, 'closeModelAccuracy', 1)
+                    elif np.mean([closeR2,slope]) < 0.95 and np.mean([closeR2,slope]) >= 0.90:
+                        AddIntToDS(entity, 'closeModelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'closeModelAccuracy', 3)
 
-                slope, intercept, r_value, p_value, std_err = stats.linregress(low[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,LOW][:-1])
-                AddFloatToDS(entity, 'lowPredSlope', slope)
-                if np.mean([lowR2,slope]) >= 0.95:
-                    AddIntToDS(entity, 'lowModelAccuracy', 1)
-                elif np.mean([lowR2,slope]) < 0.95 and np.mean([lowR2,slope]) >= 0.90:
-                    AddIntToDS(entity, 'lowModelAccuracy', 2)
-                else:
-                    AddIntToDS(entity, 'lowModelAccuracy', 3)
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
+                    AddFloatToDS(entity, 'highPredSlope', slope)
+                    if np.mean([highR2,slope]) >= 0.95:
+                        AddIntToDS(entity, 'highModelAccuracy', 1)
+                    elif np.mean([highR2,slope]) < 0.95 and np.mean([highR2,slope]) >= 0.90:
+                        AddIntToDS(entity, 'highModelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'highModelAccuracy', 3)
 
-                slope, intercept, r_value, p_value, std_err = stats.linregress(volume[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1])
-                AddFloatToDS(entity, 'volumePredSlope', slope)
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(low[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,LOW][:-1])
+                    AddFloatToDS(entity, 'lowPredSlope', slope)
+                    if np.mean([lowR2,slope]) >= 0.95:
+                        AddIntToDS(entity, 'lowModelAccuracy', 1)
+                    elif np.mean([lowR2,slope]) < 0.95 and np.mean([lowR2,slope]) >= 0.90:
+                        AddIntToDS(entity, 'lowModelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'lowModelAccuracy', 3)
 
-            
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(volume[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1])
+                    AddFloatToDS(entity, 'volumePredSlope', slope)
 
-                
-                #computed values
-#                AddFloatToDS(entity, 'openPriceChange', np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])
-#                AddFloatToDS(entity, 'openPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])/abs(openPrice[i][-1])*100.0)
-#                AddFloatToDS(entity, 'closePriceChange', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])
-#                AddFloatToDS(entity, 'closePriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
-#                AddFloatToDS(entity, 'highPriceChange', np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])
-#                AddFloatToDS(entity, 'highPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])/abs(high[i][-1])*100.0)
-#                AddFloatToDS(entity, 'lowPriceChange', np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])
-#                AddFloatToDS(entity, 'lowPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])/abs(low[i][-1])*100.0)
-#                AddFloatToDS(entity, 'volumeChange', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])
-#                AddFloatToDS(entity, 'volumeChangePercent', (np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])/abs(volume[i][-1])*100.0)
+                    #computed values
+    #                AddFloatToDS(entity, 'openPriceChange', np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])
+    #                AddFloatToDS(entity, 'openPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])/abs(openPrice[i][-1])*100.0)
+    #                AddFloatToDS(entity, 'closePriceChange', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])
+    #                AddFloatToDS(entity, 'closePriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
+    #                AddFloatToDS(entity, 'highPriceChange', np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])
+    #                AddFloatToDS(entity, 'highPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])/abs(high[i][-1])*100.0)
+    #                AddFloatToDS(entity, 'lowPriceChange', np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])
+    #                AddFloatToDS(entity, 'lowPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])/abs(low[i][-1])*100.0)
+    #                AddFloatToDS(entity, 'volumeChange', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])
+    #                AddFloatToDS(entity, 'volumeChangePercent', (np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])/abs(volume[i][-1])*100.0)
 
-                #Market snapshot
- #               AddFloatToDS(entity, 'predOpen', np.array(savedPrediction[symbols[i]])[:,OPEN][-1])
- #               AddFloatToDS(entity, 'predClose', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
- #               AddFloatToDS(entity, 'predHigh', np.array(savedPrediction[symbols[i]])[:,HIGH][-1])
- #               AddFloatToDS(entity, 'predLow', np.array(savedPrediction[symbols[i]])[:,LOW][-1])
- #               AddFloatToDS(entity, 'predVolume', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1])
-               
-                # Execute the Commit RPC synchronously and ignore the response:
-                # Apply the insert mutation if the entity was not found and close
-                # the transaction.
-                datastore.commit(req)
-          
-            except datastore.RPCError as e:
-                # RPCError is raised if any error happened during a RPC.
-                # It includes the `method` called and the `reason` of the
-                # failure as well as the original `HTTPResponse` object.
-                logging.error('Error while doing datastore operation')
-                logging.error('RPCError: %(method)s %(reason)s',
-                              {'method': e.method,
-                               'reason': e.reason})
-                logging.error('HTTPError: %(status)s %(reason)s',
-                              {'status': e.response.status,
-                               'reason': e.response.reason})
+                    #Market snapshot
+     #               AddFloatToDS(entity, 'predOpen', np.array(savedPrediction[symbols[i]])[:,OPEN][-1])
+     #               AddFloatToDS(entity, 'predClose', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
+     #               AddFloatToDS(entity, 'predHigh', np.array(savedPrediction[symbols[i]])[:,HIGH][-1])
+     #               AddFloatToDS(entity, 'predLow', np.array(savedPrediction[symbols[i]])[:,LOW][-1])
+     #               AddFloatToDS(entity, 'predVolume', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1])
+                   
+                    # Execute the Commit RPC synchronously and ignore the response:
+                    # Apply the insert mutation if the entity was not found and close
+                    # the transaction.
+                    datastore.commit(req)
+              
+                except datastore.RPCError as e:
+                    # RPCError is raised if any error happened during a RPC.
+                    # It includes the `method` called and the `reason` of the
+                    # failure as well as the original `HTTPResponse` object.
+                    logging.error('Error while doing datastore operation')
+                    logging.error('RPCError: %(method)s %(reason)s',
+                                  {'method': e.method,
+                                   'reason': e.reason})
+                    logging.error('HTTPError: %(status)s %(reason)s',
+                                  {'status': e.response.status,
+                                   'reason': e.response.reason})
 
-            #Also commit to the stock list, for faster and cheaper dataastore queries
-            try:
-                req = datastore.CommitRequest()
-                req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
-                entity = req.mutation.insert_auto_id.add()
+                #Also commit to the stock list, for faster and cheaper dataastore queries
+                try:
+                    req = datastore.CommitRequest()
+                    req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
+                    entity = req.mutation.insert_auto_id.add()
 
-                # Create a new entity key.
-                key = datastore.Key()
-                
-                # Set the entity key with only one `path_element`: no parent.
-                path = key.path_element.add()
-                path.kind = 'StockList'
+                    # Create a new entity key.
+                    key = datastore.Key()
+                    
+                    # Set the entity key with only one `path_element`: no parent.
+                    path = key.path_element.add()
+                    path.kind = 'StockList'
 
-                # Copy the entity key.
-                entity.key.CopyFrom(key)
-                
-                # - a dateTimeValue 64bit integer: `date`
-                prop = entity.property.add()
-                prop.name = 'date'
-                prop.value.timestamp_microseconds_value = long(tt.mktime(dayToPredict.timetuple()) * 1e6)
-                #prop.value.timestamp_microseconds_value = long(tt.time() * 1e6)
+                    # Copy the entity key.
+                    entity.key.CopyFrom(key)
+                    
+                    # - a dateTimeValue 64bit integer: `date`
+                    prop = entity.property.add()
+                    prop.name = 'date'
+                    prop.value.timestamp_microseconds_value = long(tt.mktime(dayToPredict.timetuple()) * 1e6)
+                    #prop.value.timestamp_microseconds_value = long(tt.time() * 1e6)
 
-                AddIntToDS(entity, 'rank', rank[symbols[i]], True)
-                AddStringToDS(entity, 'symbol', symbols[i], True)
-                AddStringToDS(entity, 'company', names[i], True)
-                AddStringToDS(entity, 'exchange', exchanges[i], True)
+                    AddIntToDS(entity, 'rank', rank[symbols[i]], True)
+                    AddStringToDS(entity, 'symbol', symbols[i], True)
+                    AddStringToDS(entity, 'company', names[i], True)
+                    AddStringToDS(entity, 'exchange', exchanges[i], True)
 
-                AddFloatToDS(entity, 'currentPrice', closePrice[i][-1])
+                    AddFloatToDS(entity, 'currentPrice', closePrice[i][-1])
 
-                AddFloatToDS(entity, 'forecastedPrice', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
+                    AddFloatToDS(entity, 'forecastedPrice', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
 
-                R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
-                slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-                if np.mean([R2,slope]) >= 0.95:
-                    AddIntToDS(entity, 'modelAccuracy', 1)
-                elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:
-                    AddIntToDS(entity, 'modelAccuracy', 2)
-                else:
-                    AddIntToDS(entity, 'modelAccuracy', 3)
-               
-                # Execute the Commit RPC synchronously and ignore the response:
-                # Apply the insert mutation if the entity was not found and close
-                # the transaction.
-                datastore.commit(req)
-          
-            except datastore.RPCError as e:
-                # RPCError is raised if any error happened during a RPC.
-                # It includes the `method` called and the `reason` of the
-                # failure as well as the original `HTTPResponse` object.
-                logging.error('Error while doing datastore operation')
-                logging.error('RPCError: %(method)s %(reason)s',
-                              {'method': e.method,
-                               'reason': e.reason})
-                logging.error('HTTPError: %(status)s %(reason)s',
-                              {'status': e.response.status,
-                               'reason': e.response.reason})
+                    R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
+                    slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
+                    if np.mean([R2,slope]) >= 0.95:
+                        AddIntToDS(entity, 'modelAccuracy', 1)
+                    elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:
+                        AddIntToDS(entity, 'modelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'modelAccuracy', 3)
+                   
+                    # Execute the Commit RPC synchronously and ignore the response:
+                    # Apply the insert mutation if the entity was not found and close
+                    # the transaction.
+                    datastore.commit(req)
+              
+                except datastore.RPCError as e:
+                    # RPCError is raised if any error happened during a RPC.
+                    # It includes the `method` called and the `reason` of the
+                    # failure as well as the original `HTTPResponse` object.
+                    logging.error('Error while doing datastore operation')
+                    logging.error('RPCError: %(method)s %(reason)s',
+                                  {'method': e.method,
+                                   'reason': e.reason})
+                    logging.error('HTTPError: %(status)s %(reason)s',
+                                  {'status': e.response.status,
+                                   'reason': e.response.reason})
     
     logging.info("\nTime of Simulation: {0:,.0f} seconds\n".format((tt.time() - startTime)))
-    
     print("\nTime of Simulation: {0:,.0f} seconds, {1:,.0f} minutes\n".format((tt.time() - startTime), (tt.time() - startTime)/60.0))
-    """
-    for i in np.arange(len(symbols)):
 
-        
-        labels = ["High","Low","Open","Close"]
-        colors = ["r","g","b","c"]
-        
-        fig = plt.figure()
-        #plt.subplots_adjust(left=0.12, bottom=0.06, right=0.90, top=0.96, wspace=0.20, hspace=0.08)
-        plt.suptitle("%s Cross Validation of SVR"%symbols[i])
-        plt.subplot(2, 2, 1)
+    #If a small run was done, view the results.
+    if len(symbols) <= 3 and platform.system() == 'Windows':
+        for i in np.arange(len(symbols)):
 
-        yPredHigh = np.array(savedPrediction[symbols[i]])[:,HIGH][:-1]
-        #print high[i][-NPredPast+1:].shape, yPredHigh.shape
-        plt.plot( high[i][-NPredPast+1:], yPredHigh, '%s.'%colors[0], label=labels[0], markersize=5, zorder=4)
-        #linear fit
-        slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
-        line = slope*high[i][-NPredPast+1:]+intercept
-        plt.plot(high[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
-        plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,HIGH][:-1], high[i][-NPredPast+1:])[0][1] )
-        #
-        
-        plt.ylabel('Predicted')
-        plt.grid(True)
-        plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
-        
-        plt.subplot(2, 2, 2)
+            
+            labels = ["High","Low","Open","Close"]
+            colors = ["r","g","b","c"]
+            
+            fig = plt.figure()
+            #plt.subplots_adjust(left=0.12, bottom=0.06, right=0.90, top=0.96, wspace=0.20, hspace=0.08)
+            plt.suptitle("%s Cross Validation of SVR"%symbols[i])
+            plt.subplot(2, 2, 1)
 
-        yPredLow = np.array(savedPrediction[symbols[i]])[:,LOW][:-1]
-        plt.plot(low[i][-NPredPast+1:], yPredLow, '%s.'%colors[1], label=labels[1], markersize=5, zorder=4)
-        #linear fit
-        slope, intercept, r_value, p_value, std_err = stats.linregress(low[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,LOW][:-1])
-        line = slope*low[i][-NPredPast+1:]+intercept
-        plt.plot(low[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
-        plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,LOW][:-1], low[i][-NPredPast+1:])[0][1] )
-        #
-        plt.grid(True)
-        plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+            yPredHigh = np.array(savedPrediction[symbols[i]])[:,HIGH][:-1]
+            #print high[i][-NPredPast+1:].shape, yPredHigh.shape
+            plt.plot( high[i][-NPredPast+1:], yPredHigh, '%s.'%colors[0], label=labels[0], markersize=5, zorder=4)
+            #linear fit
+            slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
+            line = slope*high[i][-NPredPast+1:]+intercept
+            plt.plot(high[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
+            plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,HIGH][:-1], high[i][-NPredPast+1:])[0][1] )
+            #
+            
+            plt.ylabel('Predicted')
+            plt.grid(True)
+            plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+            
+            plt.subplot(2, 2, 2)
 
-        plt.subplot(2, 2, 3)
+            yPredLow = np.array(savedPrediction[symbols[i]])[:,LOW][:-1]
+            plt.plot(low[i][-NPredPast+1:], yPredLow, '%s.'%colors[1], label=labels[1], markersize=5, zorder=4)
+            #linear fit
+            slope, intercept, r_value, p_value, std_err = stats.linregress(low[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,LOW][:-1])
+            line = slope*low[i][-NPredPast+1:]+intercept
+            plt.plot(low[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
+            plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,LOW][:-1], low[i][-NPredPast+1:])[0][1] )
+            #
+            plt.grid(True)
+            plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
 
-        yPredOpen = np.array(savedPrediction[symbols[i]])[:,OPEN][:-1]
-        plt.plot(openPrice[i][-NPredPast+1:], yPredOpen, '%s.'%colors[2], label=labels[2], markersize=5, zorder=4)
-        #linear fit
-        slope, intercept, r_value, p_value, std_err = stats.linregress(openPrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
-        line = slope*openPrice[i][-NPredPast+1:]+intercept
-        plt.plot(openPrice[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
-        plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1], openPrice[i][-NPredPast+1:])[0][1] )
-        #
-        plt.xlabel('Real')
-        plt.ylabel('Predicted')
-        plt.grid(True)
-        plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+            plt.subplot(2, 2, 3)
 
-        
-        plt.subplot(2, 2, 4)
+            yPredOpen = np.array(savedPrediction[symbols[i]])[:,OPEN][:-1]
+            plt.plot(openPrice[i][-NPredPast+1:], yPredOpen, '%s.'%colors[2], label=labels[2], markersize=5, zorder=4)
+            #linear fit
+            slope, intercept, r_value, p_value, std_err = stats.linregress(openPrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
+            line = slope*openPrice[i][-NPredPast+1:]+intercept
+            plt.plot(openPrice[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
+            plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,OPEN][:-1], openPrice[i][-NPredPast+1:])[0][1] )
+            #
+            plt.xlabel('Real')
+            plt.ylabel('Predicted')
+            plt.grid(True)
+            plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
 
-        yPredClose = np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1]
-        plt.plot(closePrice[i][-NPredPast+1:], yPredClose, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
-        #linear fit
-        slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-        line = slope*closePrice[i][-NPredPast+1:]+intercept
-        plt.plot(closePrice[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
-        plt.plot([],[],label=np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1] )
-        #
-        plt.xlabel('Real')
-        plt.grid(True)
-        plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+            
+            plt.subplot(2, 2, 4)
 
-        #plt.show()
+            yPredClose = np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1]
+            plt.plot(closePrice[i][-NPredPast+1:], yPredClose, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
+            #linear fit
+            slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
+            line = slope*closePrice[i][-NPredPast+1:]+intercept
+            plt.plot(closePrice[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
+            plt.plot([],[],label=np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1] )
+            #
+            plt.xlabel('Real')
+            plt.grid(True)
+            plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
 
-
-
-
-        fig = plt.figure()
-        vol = np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1]
-        plt.plot(volume[i][-NPredPast+1:], vol, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
-        #linear fit
-        slope, intercept, r_value, p_value, std_err = stats.linregress(volume[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1])
-        line = slope*volume[i][-NPredPast+1:]+intercept
-        plt.plot(volume[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
-        #print np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1]
-        plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1] )
-        #
-        plt.xlabel('Real')
-        plt.grid(True)
-        plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+            #plt.show()
 
 
-        plt.show()
 
 
-        
-        plt.clf()
-        plt.cla()
-        plt.close()
-    """
+            fig = plt.figure()
+            vol = np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1]
+            plt.plot(volume[i][-NPredPast+1:], vol, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
+            #linear fit
+            slope, intercept, r_value, p_value, std_err = stats.linregress(volume[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1])
+            line = slope*volume[i][-NPredPast+1:]+intercept
+            plt.plot(volume[i][-NPredPast+1:],line,'k-', label="%.3f"%slope)
+            #print np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1]
+            plt.plot([],[],label= np.corrcoef(np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1], volume[i][-NPredPast+1:])[0][1] )
+            #
+            plt.xlabel('Real')
+            plt.grid(True)
+            plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
+
+
+            plt.show()
+
+
+            
+            plt.clf()
+            plt.cla()
+            plt.close()
     
