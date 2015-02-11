@@ -177,15 +177,14 @@
 
       <div class="dateHeader">{{ dayOfForecast }}</div>
       
+      {% if url_linktext == 'Logout' %}
+
       {% set num = 0 %}
       {% for stock in stock_list %}
         <a id="linkStockCard" href="/symbol/{{stock.symbol}}">
           <div id="cardHolder" layout vertical center>
             {% raw %}
-            <stock-card
-              favorite="false"
-              on-favorite-tap="{{handleFavorite}}"
-              hidden?="{{show == 'favorites' && !false}}">
+            <stock-card>
             {% endraw %}
               <img src="../images/{{stock.exchange}}.png" />
               <h1>#{{stock.rank}}</h1>
@@ -215,6 +214,14 @@
           <stock-market style="height:200px;text-align:center;vertical-align:middle;">
             <div style="margin:auto auto auto auto;"><img style="width:50px;margin-top:60px;margin-bottom:10px;" src="/favicon.png"><br />No stocks added yet!</div>
           </stock-market>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div id="cardHolder" layout vertical center>
+          <stock-market style="height:200px;text-align:center;vertical-align:middle;">
+            <div style="margin:auto auto auto auto;"><a href="{{url}}"><img style="width:50%;;margin-top:60px;" src="../images/signin.png"></a></div>
+        </stock-market>
       </div>
       {% endif %}
       
@@ -251,7 +258,7 @@
 
       console.log('Searching for: ' + search_term.value);
 
-      window.location.href = './symbol/' + search_term.value;
+      window.location.href = '../symbol/' + search_term.value;
 
       return false;
     }

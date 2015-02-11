@@ -46,7 +46,7 @@ class UserProfile(ndb.Model):
     Note: If your application constructs the User instance, the API
     will not set a value for user_id and it returns None.
     """
-    user_id             = ndb.StringProperty(indexed=True)
+    user_id             = ndb.StringProperty()
 
     """
     Returns the user's OpenID identifier.

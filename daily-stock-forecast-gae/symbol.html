@@ -374,10 +374,7 @@
       {% for stock in stock_list %}
         <div id="cardHolder" layout vertical center>
           {% raw %}
-          <stock-card
-            favorite="false"
-            on-favorite-tap="{{handleFavorite}}"
-            hidden?="{{show == 'favorites' && !false}}">
+          <stock-card>
           {% endraw %}
             <img src="../images/{{stock.exchange}}.png" />
             <h1>#{{stock.rank}}</h1>
