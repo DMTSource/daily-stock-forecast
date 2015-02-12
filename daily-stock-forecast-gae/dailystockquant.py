@@ -70,6 +70,8 @@ class MainPage(webapp2.RequestHandler):
                     else:
                         favBinary.append(0)
                 break
+        else:
+            favBinary = np.zeros((25,))
         #
 
         i = 0
@@ -184,10 +186,28 @@ class SymbolHandler(webapp2.RequestHandler):
             timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
         #
 
+
         #query to get the top 10 stocks for newest forecast round
         #stockList = Forecast.query(Forecast.rank.IN(list(np.arange(1,11))))
         stockList = Forecast.query(Forecast.symbol == stock_symbol.upper())
 
+        #createa  binary list of stock list vs user favorite list
+        user = users.get_current_user()
+        if user:
+            up = UserProfile.query(UserProfile.user_id == str(user.user_id()))            
+            favBinary = []
+            for u in up:
+                for stock in stockList:
+                    if stock.symbol in u.favorite_list:
+                        favBinary.append(1)
+                    else:
+                        favBinary.append(0)
+                break
+        else:
+            favBinary = np.zeros((25,))
+        #
+
+        
         #3d array of the candlestick plots
         # stock, list of L, list of O, list of C, list of H, list of V
         #stocks, history, category
@@ -196,7 +216,7 @@ class SymbolHandler(webapp2.RequestHandler):
         #Stocks, history, category
         validationPlotData = []
         #3d array of computed values nstock, 10
-        computedValued = np.zeros((stockList.count(), 10), float)
+        computedValued = np.zeros((stockList.count(), 11), float)
 
         #Init items using info from forecast, just use the first item
         dayOfForecast = now.strftime("%A, %B %d %Y")
@@ -243,6 +263,7 @@ class SymbolHandler(webapp2.RequestHandler):
             computedValued[i][7] =(forecast.lowPredPrice[-1]-forecast.lowPriceHistory[-1])/abs(forecast.lowPriceHistory[-1])*100.0
             computedValued[i][8] = forecast.volumePred[-1]-forecast.volumeHistory[-1]
             computedValued[i][9] = (forecast.volumePred[-1]-forecast.volumeHistory[-1])/abs(forecast.volumeHistory[-1])*100.0
+            computedValued[i][10] = favBinary[i]
             #Count for filling arrays
             i += 1
         
@@ -278,6 +299,10 @@ class FavoiteHandler(webapp2.RequestHandler):
         # Checks for active Google account session
         user = users.get_current_user()
 
+        #Only commit to ndb if we need to
+        need_to_commit = False
+        
+        #Do we have a loged in user
         if user:
 
             #Get the users list of favorite stocks
@@ -292,6 +317,7 @@ class FavoiteHandler(webapp2.RequestHandler):
                                  federated_provider = str(user.federated_provider()),
                                  favorite_list      = []).put()
                 up = UserProfile.query(UserProfile.user_id == str(user.user_id()))
+                need_to_commit = True
             else:
                 for u in up:
                     #Update last login date
@@ -299,20 +325,31 @@ class FavoiteHandler(webapp2.RequestHandler):
                     #update user email if changed
                     if user.email != u.email:
                         u.email = str(user.email())
+                        need_to_commit = True
                 
             
             #optinal:Remove the stock if its in the list, otherwise add it
             for u in up:
                 if stock_symbol != '':
+                    need_to_commit = True
                     if stock_symbol in u.favorite_list:
                         u.favorite_list.remove(stock_symbol)
                     else:
                         u.favorite_list.append(stock_symbol)
 
             #commit the changes
-            for u in up:
-                u.put()
+            if need_to_commit:
+                for u in up:
+                    u.put()
 
+            #return to where the user was
+            if stock_symbol != '':
+                self.redirect(self.request.referer)    
+        #no user
+        else:
+            #A non user tried to favorite something, lets log them in so they get the action still after login
+            if stock_symbol != '':
+                self.redirect(users.create_login_url(self.request.uri))
 
         #Form the symbol list to query
         queryList = []
@@ -332,7 +369,7 @@ class FavoiteHandler(webapp2.RequestHandler):
             timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
         #
 
-        stockList = StockList.query(StockList.symbol.IN(queryList))
+        stockList = StockList.query(StockList.symbol.IN(queryList)).order(StockList.rank)
 
         #prevent empty query from causing crashes
         if len(queryList)==0:
@@ -358,7 +395,7 @@ class FavoiteHandler(webapp2.RequestHandler):
                 dayOfForecast = stock.date.strftime("%A, %B %d %Y")
                 #dof = forecast.date
                 break
-            
+        #Form the login/logout url and a name to id the state in jinja2
         if user:
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'

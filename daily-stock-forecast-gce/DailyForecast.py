@@ -92,7 +92,7 @@ if __name__ == "__main__":
     print "Predicting %s\n"%dayToPredict.date()
     logging.info("Predicting %s\n"%dayToPredict.date())
     
-    NPredPast             = 90
+    NPredPast             = 10
 
     startOfPredictSim     = dayToPredict - BDay(NPredPast)
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     #Download symbols
     fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = GetAllSymbols()
-    """fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = (['GOOG','NFLX','AAPL'],
+    """fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = (['HEES','NFLX','AAPL'],
                                                          ['Google Inc.','Netflix, Inc.','Apple Inc.'],
                                                          ['NASDAQ','NASDAQ','NASDAQ'],
                                                          ['Technology','Consumer Services ','Technology'],
@@ -130,7 +130,7 @@ if __name__ == "__main__":
                                             endOfHistoricalDate.year),
                                            priceFilterLow=1.0,
                                            priceFilterHigh=1e6,
-                                           minVolume=5000.0,
+                                           minVolume=1000.0,
                                            useThreading=True)
     
     #If no stocks in universe, exit
@@ -249,9 +249,9 @@ if __name__ == "__main__":
         rankItems.append(abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0))
         R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
         slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-        if np.mean([R2,slope]) >= 0.95:
+        if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.05:
             rankScore.append(1)
-        elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:
+        elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-R2,abs(1.0-slope)]) > 0.05:
             rankScore.append(2)
         else:
             rankScore.append(3)
@@ -363,42 +363,48 @@ if __name__ == "__main__":
                     #print len(openPrice[i][-NPredPast+1:]), len( np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
                     slope, intercept, r_value, p_value, std_err = stats.linregress(openPrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
                     AddFloatToDS(entity, 'openPredSlope', slope)
-                    if np.mean([openR2,slope]) >= 0.95:
+                    if np.mean([1.0-openR2,abs(1.0-slope)]) <= 0.05:
                         AddIntToDS(entity, 'openModelAccuracy', 1)
-                    elif np.mean([openR2,slope]) < 0.95 and np.mean([openR2,slope]) >= 0.90:
+                    elif np.mean([1.0-openR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-openR2,abs(1.0-slope)]) > 0.05:
                         AddIntToDS(entity, 'openModelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'openModelAccuracy', 3)
 
                     slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
                     AddFloatToDS(entity, 'closePredSlope', slope)
-                    if np.mean([closeR2,slope]) >= 0.95:
+                    if np.mean([1.0-closeR2,abs(1.0-slope)]) <= 0.05:
                         AddIntToDS(entity, 'closeModelAccuracy', 1)
-                    elif np.mean([closeR2,slope]) < 0.95 and np.mean([closeR2,slope]) >= 0.90:
+                    elif np.mean([1.0-closeR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-closeR2,abs(1.0-slope)]) > 0.05:
                         AddIntToDS(entity, 'closeModelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'closeModelAccuracy', 3)
 
                     slope, intercept, r_value, p_value, std_err = stats.linregress(high[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,HIGH][:-1])
                     AddFloatToDS(entity, 'highPredSlope', slope)
-                    if np.mean([highR2,slope]) >= 0.95:
+                    if np.mean([1.0-highR2,abs(1.0-slope)]) <= 0.05:
                         AddIntToDS(entity, 'highModelAccuracy', 1)
-                    elif np.mean([highR2,slope]) < 0.95 and np.mean([highR2,slope]) >= 0.90:
+                    elif np.mean([1.0-highR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-highR2,abs(1.0-slope)]) > 0.05:
                         AddIntToDS(entity, 'highModelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'highModelAccuracy', 3)
 
                     slope, intercept, r_value, p_value, std_err = stats.linregress(low[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,LOW][:-1])
                     AddFloatToDS(entity, 'lowPredSlope', slope)
-                    if np.mean([lowR2,slope]) >= 0.95:
+                    if np.mean([1.0-lowR2,abs(1.0-slope)]) <= 0.05:
                         AddIntToDS(entity, 'lowModelAccuracy', 1)
-                    elif np.mean([lowR2,slope]) < 0.95 and np.mean([lowR2,slope]) >= 0.90:
+                    elif np.mean([1.0-lowR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-lowR2,abs(1.0-slope)]) > 0.05:
                         AddIntToDS(entity, 'lowModelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'lowModelAccuracy', 3)
 
                     slope, intercept, r_value, p_value, std_err = stats.linregress(volume[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1])
                     AddFloatToDS(entity, 'volumePredSlope', slope)
+                    if np.mean([1.0-volR2,abs(1.0-slope)]) <= 0.05:
+                        AddIntToDS(entity, 'volumeModelAccuracy', 1)
+                    elif np.mean([1.0-volR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-volR2,abs(1.0-slope)]) > 0.05:
+                        AddIntToDS(entity, 'volumeModelAccuracy', 2)
+                    else:
+                        AddIntToDS(entity, 'volumeModelAccuracy', 3)
 
                     #computed values
     #                AddFloatToDS(entity, 'openPriceChange', np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])
@@ -469,9 +475,9 @@ if __name__ == "__main__":
 
                     R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
                     slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-                    if np.mean([R2,slope]) >= 0.95:
+                    if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.05:
                         AddIntToDS(entity, 'modelAccuracy', 1)
-                    elif np.mean([R2,slope]) < 0.95 and np.mean([R2,slope]) >= 0.90:
+                    elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.1 and np.mean([R2,abs(1.0-slope)]) > 0.05:
                         AddIntToDS(entity, 'modelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'modelAccuracy', 3)
@@ -507,7 +513,7 @@ if __name__ == "__main__":
             fig = plt.figure()
             #plt.subplots_adjust(left=0.12, bottom=0.06, right=0.90, top=0.96, wspace=0.20, hspace=0.08)
             plt.suptitle("%s Cross Validation of SVR"%symbols[i])
-            plt.subplot(2, 2, 1)
+            plt.subplot(3, 2, 1)
 
             yPredHigh = np.array(savedPrediction[symbols[i]])[:,HIGH][:-1]
             #print high[i][-NPredPast+1:].shape, yPredHigh.shape
@@ -523,7 +529,7 @@ if __name__ == "__main__":
             plt.grid(True)
             plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
             
-            plt.subplot(2, 2, 2)
+            plt.subplot(3, 2, 2)
 
             yPredLow = np.array(savedPrediction[symbols[i]])[:,LOW][:-1]
             plt.plot(low[i][-NPredPast+1:], yPredLow, '%s.'%colors[1], label=labels[1], markersize=5, zorder=4)
@@ -536,7 +542,7 @@ if __name__ == "__main__":
             plt.grid(True)
             plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
 
-            plt.subplot(2, 2, 3)
+            plt.subplot(3, 2, 3)
 
             yPredOpen = np.array(savedPrediction[symbols[i]])[:,OPEN][:-1]
             plt.plot(openPrice[i][-NPredPast+1:], yPredOpen, '%s.'%colors[2], label=labels[2], markersize=5, zorder=4)
@@ -552,7 +558,7 @@ if __name__ == "__main__":
             plt.legend(loc='upper left', numpoints=1, ncol=1, fancybox=True, prop={'size':10}, framealpha=0.50)
 
             
-            plt.subplot(2, 2, 4)
+            plt.subplot(3, 2, 4)
 
             yPredClose = np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1]
             plt.plot(closePrice[i][-NPredPast+1:], yPredClose, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
@@ -571,7 +577,9 @@ if __name__ == "__main__":
 
 
 
-            fig = plt.figure()
+            plt.subplot(3, 2, 5)
+
+            plt.ticklabel_format(style='sci')
             vol = np.array(savedPrediction[symbols[i]])[:,VOLUME][:-1]
             plt.plot(volume[i][-NPredPast+1:], vol, '%s.'%colors[3], label=labels[3], markersize=5, zorder=4)
             #linear fit

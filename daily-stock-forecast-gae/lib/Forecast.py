@@ -63,10 +63,11 @@ class Forecast(ndb.Model):
     lowPredSlope             = ndb.FloatProperty(validator=roundValue)
     volumePredSlope          = ndb.FloatProperty(validator=roundValue)
 
-    openModelAccuracy        = ndb.IntegerProperty()
-    closeModelAccuracy       = ndb.IntegerProperty()
-    highModelAccuracy        = ndb.IntegerProperty()
-    lowModelAccuracy         = ndb.IntegerProperty()
+    openModelAccuracy           = ndb.IntegerProperty()
+    closeModelAccuracy          = ndb.IntegerProperty()
+    highModelAccuracy           = ndb.IntegerProperty()
+    lowModelAccuracy            = ndb.IntegerProperty()
+    volumeModelAccuracy         = ndb.IntegerProperty()
 
     """#computed values(check docs for better cv)
     

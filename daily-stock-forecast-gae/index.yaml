@@ -1,7 +1,5 @@
 indexes:
-
-- kind: Forecast
-  ancestor: no
+- kind: StockList
   properties:
-  - name: date
+  - name: symbol
   - name: rank

@@ -32,6 +32,15 @@
   <link rel="import" href="../components/stock-corrInfo.html">
   <link rel="import" href="../components/stock-market.html">
 
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-59618421-1', 'auto');
+  ga('send', 'pageview');
+  </script>
+
   <style>
   html,body {
     height: 100%;
@@ -48,6 +57,10 @@
     background: #2196F3;
     color: white;
   }
+  .title{
+      font-size: 0.7em;
+      font-weight: 400;
+    }
   #tabs {
     width: 100%;
     margin: 0;
@@ -103,6 +116,10 @@
     margin-top: 33px;
   }
   @media (min-width: 650px) {
+    .title{
+      font-size: 1.0em;
+      font-weight: 400;
+    }
     #tabs {
       width: 325px;
     }
@@ -208,7 +225,7 @@
   {% endfor %}
   
       var primaryOptions = {
-        title: '90D MODEL CORRELATION SLOPE/R2',
+        title: '45D MODEL CORRELATION SLOPE/R2',
     legend: {position:'in', alignment:'center', maxLines: 1},
         tooltip: {isHtml: true}, // This MUST be set to true for your chart to show.
     width: 315, height: 209,
@@ -336,7 +353,7 @@
       <paper-menu-button>
         <paper-icon-button id="help-dialog-button" icon="help"></paper-icon-button>
         <paper-dialog style="width:75%;" id="help-dialog" heading="About" transition="paper-dialog-transition-bottom">
-          <p flex>Daily Stock Forecast is a free service for day trading professionals created by <a target="_blank" href="http://www.linkedin.com/in/derekmtishler">Derek M Tishler</a>.Using historical stock prices and machine learning, DSF forecasts the next day's open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon). It offers full exposure of the model's past 90 day performance for each stock via performance correlation with actual prices.</p>
+          <p flex>Daily Stock Forecast is a free service for day trading professionals created by <a target="_blank" href="http://www.linkedin.com/in/derekmtishler">Derek M Tishler</a>.Using historical stock prices and machine learning, DSF forecasts the next day's open, close, high, and low stock prices from the AMEX, NYSE, and Nasdaq exchanges (more exchanges coming soon). It offers full exposure of the model's past 10 day performance for each stock via performance correlation with actual prices.</p>
           <p><strong>Technology</strong><br />
           Daily Stock Forecast is powered by <a target="_blank" href="https://www.polymer-project.org/">Polymer</a>, <a target="_blank" href="https://cloud.google.com/appengine/">Google App Engine</a>, <a target="_blank" href="https://cloud.google.com/compute/">Google Compute Engine</a>,<a target="_blank" href="https://cloud.google.com/datastore/">Google Cloud Datastore</a>, <a target="_blank" href="https://www.python.org/">Python 2.7</a>, <a target="_blank" href="http://scikit-learn.org/">Scikit-Learn</a>, <a target="_blank" href="http://www.numpy.org/">Numpy</a>, <a target="_blank" href="https://code.google.com/p/yahoo-finance-managed/">Yahoo!Managed</a>, and many more. Daily stock lists and historical data are obtained from the <a target="_blank" href="http://www.nasdaq.com/screening/company-list.aspx">Nasdaq Company List</a> and <a target="_blank" href="http://finance.yahoo.com/">Yahoo Finance.</a></p>
           <p><strong>Disclaimer</strong><br />This site and the generated forecasts are not inventment advice. Use at your own risk/discretion.</p>
@@ -391,7 +408,11 @@
             {{'{0:,.2f}'.format(-1.0*computed_values[num][2]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][3]) }}%)</h7>
             {% endif %}
             <h8>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
-            <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #636363;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+            {% if computed_values[num][10] == 0 %}
+              <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #636363;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+            {% else %}
+              <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #FFC107;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
+            {% endif %}
           </stock-card>
 
         </div>
