@@ -84,12 +84,12 @@ if __name__ == "__main__":
 
     #First day of trading
     nowTime = datetime.now(tz=timezone('US/Eastern')).time()
-    if nowTime >= time(16,45):
+    if nowTime >= time(22,00):
         dayToPredict = datetime.now(tz=timezone('US/Eastern')) + BDay(1)
     else:
         dayToPredict = datetime.now(tz=timezone('US/Eastern')) + BDay(0)
             
-    print "Predicting %s\n"%dayToPredict.date()
+    print "\nPredicting %s\n"%dayToPredict.date()
     logging.info("Predicting %s\n"%dayToPredict.date())
     
     NPredPast             = 10
@@ -176,6 +176,13 @@ if __name__ == "__main__":
     predDays = predDays.delete(dropList)
     #print len(predDays)
     #
+
+    #Confirm that the day before the prediction is our last history day
+    if endOfHistoricalDate.day !=  dates[0][-1].day:
+        print endOfHistoricalDate
+        print dates[0][-1]
+        print 'We do not have previous day''s values'
+        exit()
     
     cycleTime = tt.time() #track time of each percent sim progress
     for i in np.arange(len(predDays)):

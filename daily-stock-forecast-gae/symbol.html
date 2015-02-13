@@ -115,6 +115,24 @@
     text-align: center; 
     margin-top: 33px;
   }
+  #dirarrow{
+    width:10px;
+    height:10px;
+    padding:0;
+    margin:0 2px 0 0;
+  }
+  #dirArrowBig{
+    width:15px;
+    height:15px;
+    padding:0;
+    margin:0 2px 0 0;
+  }
+  #accuracyImg{
+    width:10px;
+    height:10px;
+    padding:0;
+    margin:0 0 -2px 1px;
+  }
   @media (min-width: 650px) {
     .title{
       font-size: 1.0em;
@@ -136,6 +154,20 @@
       color:#A6D5FA;
       display: inline;
     }
+    #dirarrow{
+      width:12px;
+      height:12px;
+      padding:0;
+      margin:0 2px 0 0;
+    }
+    #dirArrowBig{
+      width:20px;
+      height:20px;
+    }
+    #accuracyImg{
+      width:12px;
+      height:12px;
+    }
   }
   </style>
 
@@ -145,13 +177,19 @@
     google.load("visualization", "1.1", {packages:["bar"]});
     google.setOnLoadCallback(drawChart);
     google.setOnLoadCallback(drawTooltipCharts);
-    
-  function drawChart() {
-    
-    var candleOptions = {
+    google.setOnLoadCallback(resize);
+
+    function resize () {
+      drawChart();
+      drawTooltipCharts();
+    }
+    window.onresize = resize;
+
+
+  var candleOptions = {
       title:'PRICE HISTORY + 1 DAY PREDICTION',
           legend:'none',
-      width: 420, height: 209,
+      //width: 420, height: 209,
         chartArea: {left: '10%',width:'78%',height:'82%'},
       seriesType: "candlesticks",
       tooltip: {isHtml: true},
@@ -167,6 +205,9 @@
         },
 
       };
+
+  function drawChart() {
+    
     
     {% set num = 0 %}
     {% for table in forecast_data %}
@@ -225,10 +266,10 @@
   {% endfor %}
   
       var primaryOptions = {
-        title: '45D MODEL CORRELATION SLOPE/R2',
+        title: '10D MODEL CORRELATION SLOPE/R2',
     legend: {position:'in', alignment:'center', maxLines: 1},
         tooltip: {isHtml: true}, // This MUST be set to true for your chart to show.
-    width: 315, height: 209,
+    //width: 315, height: 209,
     chartArea: {left: '15%',width:'84%',height:'80%'},
     //focusTarget: 'category',
     seriesType: "bars",
@@ -242,7 +283,7 @@
       var tooltipOptions = {
         //title: 'CORRELATION DEPENDENCE',
         legend: 'none',
-    width: 300, height: 300,
+    width: 200, height: 200,
     chartArea: {width:'70%',height:'70%'},
     hAxis: {title: 'Real',textPosition: 'none'},
         vAxis: {title: 'Predicted',textPosition: 'none'},//, textPosition:'out'},
@@ -401,13 +442,13 @@
             <h5>{{stock.closePriceHistory[-1] }} - {{ stock.closePriceHistory[-1]+computed_values[num][2]}}</h5>
             <h6>Forecasted Close vs Previous Close</h6>
             {% if computed_values[num][2] > 0.0 %}
-            <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+            <h7><img src="../images/uparrow.png" id="dirArrowBig" />
             {{'{0:,.2f}'.format(computed_values[num][2]) }}({{ '{0:,.2f}'.format(computed_values[num][3]) }}%)</h7>
             {% else %}
-            <h7 style="color:#F44336;"><img src="../images/downarrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+            <h7 style="color:#F44336;"><img src="../images/downarrow.png" id="dirArrowBig" />
             {{'{0:,.2f}'.format(-1.0*computed_values[num][2]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][3]) }}%)</h7>
             {% endif %}
-            <h8>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
+            <h8>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" id="accuracyImg" /></h8>
             {% if computed_values[num][10] == 0 %}
               <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #636363;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
             {% else %}
@@ -422,45 +463,45 @@
 
             <h1>Forecasted Open vs Previous Open</h1>
             {% if computed_values[num][0] > 0.0 %}
-              <h2><img src="../images/uparrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h2><img src="../images/uparrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(computed_values[num][0]) }}({{ '{0:,.2f}'.format(computed_values[num][1]) }}%)</h2>
             {% else %}
-              <h2 style="color:#F44336;"><img src="../images/downarrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h2 style="color:#F44336;"><img src="../images/downarrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][0]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][1]) }}%)</h2>
             {% endif %}
-            <h3>Model Accuracy <img src="../images/rank{{stock.openModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h3>
+            <h3>Model Accuracy <img src="../images/rank{{stock.openModelAccuracy}}.png" id="accuracyImg" /></h3>
 
             <h4>Forecasted Close vs Previous Close</h4>
             {% if computed_values[num][2] > 0.0 %}
-              <h5><img src="../images/uparrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h5><img src="../images/uparrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(computed_values[num][2]) }}({{ '{0:,.2f}'.format(computed_values[num][3]) }}%)</h5>
             {% else %}
-              <h5 style="color:#F44336;"><img src="../images/downarrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h5 style="color:#F44336;"><img src="../images/downarrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][2]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][3]) }}%)</h5>
             {% endif %}
-            <h6>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h6>
+            <h6>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" id="accuracyImg" /></h6>
 
             <h7>Forecasted High vs Previous High</h7>
             {% if computed_values[num][4] > 0.0 %}
-              <h8><img src="../images/uparrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h8><img src="../images/uparrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(computed_values[num][4]) }}({{ '{0:,.2f}'.format(computed_values[num][5]) }}%)</h8>
             {% else %}
-              <h8 style="color:#F44336;"><img src="../images/downarrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h8 style="color:#F44336;"><img src="../images/downarrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][4]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][5]) }}%)</h8>
             {% endif %}
-            <h9>Model Accuracy <img src="../images/rank{{stock.highModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h9>
+            <h9>Model Accuracy <img src="../images/rank{{stock.highModelAccuracy}}.png" id="accuracyImg" /></h9>
 
             <h10>Forecasted Low vs Previous Low</h10>
             {% if computed_values[num][6] > 0.0 %}
-              <h11><img src="../images/uparrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h11><img src="../images/uparrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(computed_values[num][6]) }}({{ '{0:,.2f}'.format(computed_values[num][7]) }}%)</h11>
             {% else %}
-              <h11 style="color:#F44336;"><img src="../images/downarrow.png" style="width:15px;height:15px;padding:0;margin:0 2px 0 0;" />
+              <h11 style="color:#F44336;"><img src="../images/downarrow.png" id="dirarrow" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][6]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][7]) }}%)</h11>
             {% endif %}
-            <h12>Model Accuracy <img src="../images/rank{{stock.lowModelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h12>
+            <h12>Model Accuracy <img src="../images/rank{{stock.lowModelAccuracy}}.png" id="accuracyImg" /></h12>
 
-            <div id="forecast_div{{ num }}" style="width: 420px; height: 209px;margin:0px auto 0px auto;text-align:center;"></div>
+            <div id="forecast_div{{ num }}" style="width: 100%; height: 100%;"></div>
           </stock-price>
         </div>
 
@@ -529,9 +570,10 @@
                 {% endif %}
               </stock-corrInfo>  
             </div>
-
-            <div id="hidden_div{{ num }}" style="width:100px;height:100px;display:none;"></div>
-            <div id="validation_div{{ num }}" style="width:315px;height:209px;margin:0px auto 0px auto;text-align:center;"></div>
+            <div style="width:55%;">
+              <div id="hidden_div{{ num }}" style="width:100px;height:100px;display:none;"></div>
+              <div id="validation_div{{ num }}" style="width:100%;height:100%;"></div>
+            </div>
           </div>
           </stock-correlation>
         </div>

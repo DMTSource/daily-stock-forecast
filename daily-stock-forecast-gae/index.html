@@ -108,11 +108,16 @@
     text-decoration: none;
     color: black;
   }
-  help-dialog{
-    width: 100%;
+  #dirArrowBig{
+    width:15px;
+    height:15px;
+    padding:0;margin:0 2px 0 0;
   }
-  Search-dialog{
-    width: 100%;
+  #accuracyImg{
+    width:10px;
+    height:10px;
+    padding:0;
+    margin:0 0 -2px 1px;
   }
   @media (min-width: 650px) {
     .title{
@@ -134,6 +139,14 @@
       font-size: 0.6em;
       color:#A6D5FA;
       display: inline;
+    }
+    #dirArrowBig{
+      width:20px;
+      height:20px;
+    }
+    #accuracyImg{
+      width:12px;
+      height:12px;
     }
   }
   </style>
@@ -201,13 +214,13 @@
               <h5>{{stock.currentPrice}} - {{stock.forecastedPrice}}</h5>
               <h6>Forecasted Close vs Previous Close</h6>
               {% if computed_values[num][0] > 0.0 %}
-                <h7><img src="../images/uparrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+                <h7><img src="../images/uparrow.png" id="dirArrowBig" />
               {{'{0:,.2f}'.format(computed_values[num][0]) }}({{ '{0:,.2f}'.format(computed_values[num][1]) }}%)</h7>
               {% else %}
-                <h7 style="color:#F44336;"><img src="../images/downarrow.png" style="width:20px;height:20px;padding:0;margin:0 2px 0 0;" />
+                <h7 style="color:#F44336;"><img src="../images/downarrow.png" id="dirArrowBig" />
               {{'{0:,.2f}'.format(-1.0*computed_values[num][0]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][1]) }}%)</h7>
               {% endif %}
-                <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" style="width:12px;height:12px;padding:0;margin:0 0 -2px 1px;" /></h8>
+                <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" id="accuracyImg" /></h8>
               {% if computed_values[num][2] == 0 %}
                 <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #636363;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
               {% else %}
