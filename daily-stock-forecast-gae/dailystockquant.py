@@ -70,8 +70,11 @@ class MainPage(webapp2.RequestHandler):
                     else:
                         favBinary.append(0)
                 break
+            #case where user exists(like admin) but no profile yet
+            if stockList.count() != len(favBinary):
+                favBinary = np.zeros((stockList.count(),))
         else:
-            favBinary = np.zeros((25,))
+            favBinary = np.zeros((stockList.count(),))
         #
 
         i = 0
@@ -203,8 +206,11 @@ class SymbolHandler(webapp2.RequestHandler):
                     else:
                         favBinary.append(0)
                 break
+            #case where user exists(like admin) but no profile yet
+            if stockList.count() != len(favBinary):
+                favBinary = np.zeros((stockList.count(),))
         else:
-            favBinary = np.zeros((25,))
+            favBinary = np.zeros((stockList.count(),))
         #
 
         
@@ -344,7 +350,10 @@ class FavoiteHandler(webapp2.RequestHandler):
 
             #return to where the user was
             if stock_symbol != '':
-                self.redirect(self.request.referer)    
+                try:
+                    self.redirect(self.request.referer)
+                except:
+                    self.redirect('./')
         #no user
         else:
             #A non user tried to favorite something, lets log them in so they get the action still after login

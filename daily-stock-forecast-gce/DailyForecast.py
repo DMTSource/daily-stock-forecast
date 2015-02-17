@@ -179,10 +179,10 @@ if __name__ == "__main__":
 
     #Confirm that the day before the prediction is our last history day
     if endOfHistoricalDate.day !=  dates[0][-1].day:
-        print endOfHistoricalDate
-        print dates[0][-1]
-        print 'We do not have previous day''s values'
-        exit()
+        print "---- WARNING WARNING WARNING ----"
+        print str(endOfHistoricalDate.date()) + ' : Expected end of historical'
+        print str(dates[0][-1]) + ' : Recieved end of historical'
+        print 'We do not have previous day''s values, reject unless holiday\n'
     
     cycleTime = tt.time() #track time of each percent sim progress
     for i in np.arange(len(predDays)):

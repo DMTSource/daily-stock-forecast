@@ -28,11 +28,11 @@ def InjectTestData():
         industry                 = "Technology",
 
         #predictions
-        openPredPrice            = list(550.0+5.0*(np.random.ranf(91)-0.5)),
-        closePredPrice           = list(550.0+5.0*(np.random.ranf(91)-0.5)),
-        highPredPrice            = list(555.0+10.0*(np.random.ranf(91)-0.5)),
-        lowPredPrice             = list(545.0+10.0*(np.random.ranf(91)-0.5)),
-        volumePred               = list(np.random.randint(1850000,2150000, 91)),
+        openPredPrice            = list(550.0+5.0*(np.random.ranf(11)-0.5)),
+        closePredPrice           = list(550.0+5.0*(np.random.ranf(11)-0.5)),
+        highPredPrice            = list(555.0+10.0*(np.random.ranf(11)-0.5)),
+        lowPredPrice             = list(545.0+10.0*(np.random.ranf(11)-0.5)),
+        volumePred               = list(np.random.randint(1850000,2150000, 11)),
         dayOfPred                = ['M','Tu','W','Th','F',
                                     'M','Tu','W','Th', 'F',
                                     'M','Tu','W','Th', 'F',
@@ -42,11 +42,11 @@ def InjectTestData():
                                     'M'],
 
         #History lists
-        openPriceHistory         = list(550.0+5.0*(np.random.ranf(90)-0.5)),
-        closePriceHistory        = list(550.0+5.0*(np.random.ranf(90)-0.5)),
-        highPriceHistory         = list(560.0+10.0*(np.random.ranf(90)-0.5)),
-        lowPriceHistory          = list(540.0+10.0*(np.random.ranf(90)-0.5)),
-        volumeHistory            = list(np.random.randint(1850000,2150000, 90)),
+        openPriceHistory         = list(550.0+5.0*(np.random.ranf(10)-0.5)),
+        closePriceHistory        = list(550.0+5.0*(np.random.ranf(10)-0.5)),
+        highPriceHistory         = list(560.0+10.0*(np.random.ranf(10)-0.5)),
+        lowPriceHistory          = list(540.0+10.0*(np.random.ranf(10)-0.5)),
+        volumeHistory            = list(np.random.randint(1850000,2150000, 10)),
 
         #prediction validation value, R2
         openPredR2               = 1.0 + (np.random.ranf(1)[0] - 0.5)/10.0,
