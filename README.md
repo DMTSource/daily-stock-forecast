@@ -9,13 +9,11 @@ machine learning on historical values to forecast the open,
 close, high, low, and volume of the next business day for each
 stock in our expanding universe.
 
-Daily Stock Forecast is currently in development, a proof of
-concept version of the site can be viewed here:<br />
+Daily Stock Forecast can be viewed today!<br />
 <http://1.daily-stock-forecast.appspot.com/>
 
 Concept images of the in development Polymer site:<br />
-<https://www.dropbox.com/s/91ddg50jnbkw7pc/DSF1.png?dl=0> <br />
-<https://www.dropbox.com/s/keflbdkzq5u7wr5/DSF2.png?dl=0>
+![](https://github.com/github/DMTSource/daily-stock-forecast/master/daily-stock-forecast.png)
 
 Features
 ========
