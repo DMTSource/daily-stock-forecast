@@ -13,7 +13,7 @@ Daily Stock Forecast can be viewed today!<br />
 <http://1.daily-stock-forecast.appspot.com/>
 
 Concept images of the in development Polymer site:<br />
-![](https://github.com/github/DMTSource/daily-stock-forecast/master/daily-stock-forecast.png)
+![](https://github.com/DMTSource/daily-stock-forecast/blob/master/daily-stock-forecast.png)
 
 Features
 ========
