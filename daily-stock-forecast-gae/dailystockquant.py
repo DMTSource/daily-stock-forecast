@@ -378,7 +378,7 @@ class FavoiteHandler(webapp2.RequestHandler):
             timeString = "{0:s} EST  - US Markets Are Closed".format(now.strftime("%a, %b %d %Y, %I:%M%p"))
         #
 
-        stockList = StockList.query(StockList.symbol.IN(queryList)).order(StockList.rank)
+        stockList = Forecast.query(Forecast.symbol.IN(queryList)).order(Forecast.rank)
 
         #prevent empty query from causing crashes
         if len(queryList)==0:
@@ -392,14 +392,16 @@ class FavoiteHandler(webapp2.RequestHandler):
         i = 0
         if len(queryList)!=0:
             for stock in stockList:
-                computedCloseValues[i][0] = stock.forecastedPrice-stock.currentPrice
-                computedCloseValues[i][1] = (stock.forecastedPrice-stock.currentPrice)/abs(stock.currentPrice)*100.0
+                #computedCloseValues[i][0] = stock.forecastedPrice-stock.currentPrice
+                #computedCloseValues[i][1] = (stock.forecastedPrice-stock.currentPrice)/abs(stock.currentPrice)*100.0
+                computedCloseValues[i][0] = stock.closePredPrice[-1]-stock.closePriceHistory[-1]
+                computedCloseValues[i][1] = (stock.closePredPrice[-1]-stock.closePriceHistory[-1])/abs(stock.closePriceHistory[-1])*100.0
                 i += 1
 
         #Init items using info from forecast, just use the first item
         dayOfForecast = now.strftime("%A, %B %d %Y")
         dof = now
-        if stock_symbol != '':
+        if stockList.count() > 0:
             for stock in stockList:
                 dayOfForecast = stock.date.strftime("%A, %B %d %Y")
                 #dof = forecast.date

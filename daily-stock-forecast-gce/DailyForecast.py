@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     #First day of trading
     nowTime = datetime.now(tz=timezone('US/Eastern')).time()
-    if nowTime >= time(22,00):
+    if nowTime >= time(20,00):
         dayToPredict = datetime.now(tz=timezone('US/Eastern')) + BDay(1)
     else:
         dayToPredict = datetime.now(tz=timezone('US/Eastern')) + BDay(0)
@@ -307,7 +307,7 @@ if __name__ == "__main__":
 
         #Save each symbol into the datastore
         for i in np.arange(len(symbols)):
-            if(rank[symbols[i]] <= 100000):
+            if rank[symbols[i]] <= 100000:
                 try:
                     req = datastore.CommitRequest()
                     req.mode = datastore.CommitRequest.NON_TRANSACTIONAL
@@ -448,7 +448,7 @@ if __name__ == "__main__":
                     logging.error('HTTPError: %(status)s %(reason)s',
                                   {'status': e.response.status,
                                    'reason': e.response.reason})
-
+            if rank[symbols[i]] <= 25:
                 #Also commit to the stock list, for faster and cheaper dataastore queries
                 try:
                     req = datastore.CommitRequest()

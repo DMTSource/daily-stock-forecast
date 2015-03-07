@@ -27,10 +27,10 @@ class MainPage (webapp2.RequestHandler):
             #list_of_entities = ndb.get_multi(list_of_keys)
             ndb.delete_multi(list_of_keys)
 
-            list_of_keys = StockList.query().fetch(500, keys_only=True)
-            #list_of_keys = ndb.put_multi(list_of_entities)
-            #list_of_entities = ndb.get_multi(list_of_keys)
-            ndb.delete_multi(list_of_keys)
+        list_of_keys = StockList.query().fetch(25, keys_only=True)
+        #list_of_keys = ndb.put_multi(list_of_entities)
+        #list_of_entities = ndb.get_multi(list_of_keys)
+        ndb.delete_multi(list_of_keys)
         
 
         self.response.out.write('All Forecasts Deleted')

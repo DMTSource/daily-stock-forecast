@@ -7582,7 +7582,7 @@ core-icon {
               <h2>{{stock.symbol}}</h2>
               <h3>{{stock.company}}</h3>
               <h4>{{stock.exchange}}</h4>
-              <h5>{{stock.currentPrice}} - {{stock.forecastedPrice}}</h5>
+              <h5>{{stock.closePriceHistory[-1] }} - {{ stock.closePriceHistory[-1]+computed_values[num][0]}}</h5>
               <h6>Forecasted Close vs Previous Close</h6>
               {% if computed_values[num][0] >= 0.0 %}
               <h7><img src="../images/uparrow.png" id="dirArrowBig">
@@ -7591,7 +7591,7 @@ core-icon {
               <h7 style="color:#F44336;"><img src="../images/downarrow.png" id="dirArrowBig">
               {{'{0:,.2f}'.format(-1.0*computed_values[num][0]) }}({{ '{0:,.2f}'.format(-1.0*computed_values[num][1]) }}%)</h7>
               {% endif %}
-              <h8>Model Accuracy <img src="../images/rank{{stock.modelAccuracy}}.png" id="accuracyImg"></h8>
+              <h8>Model Accuracy <img src="../images/rank{{stock.closeModelAccuracy}}.png" id="accuracyImg"></h8>
               <core-icon-button style="position: absolute; top: 3px; right: 3px; color: #FFC107;" icon="star" onclick="window.location.href='/favorite/{{stock.symbol}}';return false;"></core-icon-button>
               
             </stock-card>
@@ -7602,7 +7602,7 @@ core-icon {
 
       {% if computed_values|length == 0 %}
       <div id="cardHolder" layout="" vertical="" center="">
-          <stock-market style="height:200px;text-align:center;vertical-align:middle;">
+          <stock-market style="height:200px;text-align:center;vertical-align:middle;margin-bottom:10px;">
             <div style="margin:auto auto auto auto;"><img style="width:50px;margin-top:60px;margin-bottom:10px;" src="/favicon.png"><br>No stocks added yet!</div>
           </stock-market>
       </div>
@@ -7610,11 +7610,29 @@ core-icon {
 
       {% else %}
       <div id="cardHolder" layout="" vertical="" center="">
-          <stock-market style="height:200px;text-align:center;vertical-align:middle;">
+          <stock-market style="height:200px;text-align:center;vertical-align:middle;margin-bottom:10px;">
             <div style="margin:auto auto auto auto;"><a href="{{url}}"><img style="width:50%;;margin-top:60px;" src="../images/signin.png"></a></div>
         </stock-market>
       </div>
       {% endif %}
+
+      <div style="width:100%;font-size:0.8rem;text-decoration: none;" layout horizontal center>
+        <div flex>
+          <div id="fb-root"></div>
+          <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=1577515129134902&version=v2.0";
+            fjs.parentNode.insertBefore(js, fjs);
+            }(document, 'script', 'facebook-jssdk'));
+          </script>
+          <div class="fb-like" data-href="https://www.facebook.com/DailyStockForecast" data-width="250" data-layout="standard" data-action="like" data-show-faces="false" data-share="true"></div>
+        </div>
+        <div>
+        <a style="text-decoration: none;" href="https://twitter.com/Stock_Forecast" target="_blank">@Stock_Forecast</a>
+        </div>
+      </div>
       
     </div>
 
