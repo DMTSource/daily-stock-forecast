@@ -16,9 +16,8 @@ from sklearn.svm import SVR
 
 def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], indexId=0, useThreading=False, c=100, Gamma=0.01, Epsilon=0.1): # returnList, indexId,
     """
-     regression on the data and optionally display
+    regression on the data and optionally display
   
-
     Parameters
     ----------
     data : array like
@@ -28,12 +27,9 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
     -------
     maskArray : numpy array
         2D numpy array containing GaussianProcess fit 
-
     """
     
-
     fileName="Images/SVR/%s.png" % (symbol)
-
 
     labels = ["High","Low","Open","Close"]
     colors = ["r","g","b","c"]
@@ -48,17 +44,14 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
     
     for series in seriesSet:
 
-        
-
         X = np.arange(series.shape[0])
         X = np.atleast_2d(X).T
         y = series
         
-        
         startTime = time.time()
         # Mesh the input space for evaluations of the real function, the prediction and
         # its MSE
-        x = np.atleast_2d(np.linspace(0, len(series), (len(series))*1.0)).T
+        x = np.atleast_2d(np.linspace(len(series), len(series), 1.0)).T
 
         #kernel='rbf', ‘linear’, ‘poly’, ‘sigmoid’, ‘precomputed’
         SVR_model = SVR(kernel='rbf',C=c,gamma=Gamma, epsilon=Epsilon)
@@ -69,7 +62,12 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
         
         # Make the prediction on the meshed x-axis (ask for MSE as well)
         y_pred = SVR_model.predict(x)
-        
+
+        """print len(X)
+        print X
+        print len(x)
+        print x
+        exit()"""
 
         #print SVR_model.score(x,y_pred)
         

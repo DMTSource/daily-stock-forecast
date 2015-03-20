@@ -1,0 +1,14 @@
+#zipline
+
+#Run one backtest and generate pickle result file
+run_algo.py -f dual_moving_avg.py --symbols AAPL --capital_base 100000 --start 2014-1-1 --end 2015-1-1 -o dma.pickle
+
+#start python for analysis and plotting
+python
+
+#Print pickle with headers
+import pandas as pd
+perf = pd.read_pickle('dma.pickle')
+perf.head()
+
+#Plot results

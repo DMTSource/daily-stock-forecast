@@ -30,7 +30,7 @@ import calendar
 import time as tt
 
 import platform
-if platform.system() != 'Windows':
+if platform.system() != 'Windows' and platform.system() != 'Darwin':
     import googledatastore as datastore
 
 import logging
@@ -91,24 +91,23 @@ if __name__ == "__main__":
             
     print "\nPredicting %s\n"%dayToPredict.date()
     logging.info("Predicting %s\n"%dayToPredict.date())
-    
-    NPredPast             = 10
 
-    startOfPredictSim     = dayToPredict - BDay(NPredPast)
+    out_of_sameple_bin_size = 10   #days
+    history_len             = 500 #days
+    saftey_days             = 25  #Number of extra history days to fetch,to ensure domain length matches above
 
     endOfHistoricalDate   = dayToPredict - BDay(1)
-    startOfHistoricalDate = startOfPredictSim - BDay(101)
-    
-    #Perform a guess for each prediction day
-    predDays = pd.bdate_range(startOfPredictSim, dayToPredict)
+    startOfHistoricalDate = endOfHistoricalDate - BDay(history_len) - BDay(saftey_days)
+
+    predDays = pd.bdate_range(dayToPredict - BDay(10), dayToPredict)
 
     #Download symbols
-    fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = GetAllSymbols()
-    """fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = (['HEES','NFLX','AAPL'],
-                                                         ['Google Inc.','Netflix, Inc.','Apple Inc.'],
-                                                         ['NASDAQ','NASDAQ','NASDAQ'],
-                                                         ['Technology','Consumer Services ','Technology'],
-                                                         ['Software','Entertainment','Software'])"""
+    #fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = GetAllSymbols()
+    fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = (['SPY','HEES','NFLX','AAPL'],
+                                                         ['SPY Index','Google Inc.','Netflix, Inc.','Apple Inc.'],
+                                                         ['NYSE','NASDAQ','NASDAQ','NASDAQ'],
+                                                         ['Technology','Technology','Consumer Services','Technology'],
+                                                         ['Software','Software','Entertainment','Software'])
     """fullSymbols, fullNames, fullExchange, fullSector, fullIndustry  = (['SPY'],
                                                                        ['SPY Index'],
                                                                        ['NYSE'],
@@ -130,8 +129,15 @@ if __name__ == "__main__":
                                             endOfHistoricalDate.year),
                                            priceFilterLow=1.0,
                                            priceFilterHigh=1e6,
-                                           minVolume=1000.0,
-                                           useThreading=True)
+                                           minVolume=1.0,
+                                           useThreading=True,
+                                           requiredDomain = history_len)
+    
+    #We need to fetch extra days so we have the right # to handle the fixed dx indexing
+    if len(dates[0]) != history_len:
+        print "Insufficient domain, increase saftey_days."
+        print len(dates[0])
+        exit()
     
     #If no stocks in universe, exit
     if(len(symbols) == 0):
@@ -139,43 +145,7 @@ if __name__ == "__main__":
     
     #Cross validate pred against history at end of simulation
     savedPrediction = {}
-    
-    #Check that each stock has the right domain(dates), if we cant get historical, then drop that prediction's day
-    #loop trough past pred days, remove any that are not in history, dont include final day
-    dropList = []
-    #We have to check each symbol, but then we must ensure all others are also adjusted
-    #for i in np.arange(len(symbols)):
-    #Check each date in the predDays
-    for j in np.arange(len(predDays)-1):
-        if predDays[j].date() not in dates[0]:
-            #Track the items to be dropped from the predDays list
-            dropList.append(j)
-            #Check if this bad date IS contained in other symbols
-                
-    predDays = predDays.delete(dropList)
-    NPredPast = len(predDays)
-    #print len(predDays)
-    #
-
-    #Make sure the first past prediction day is in the history
-    if predDays[0].date() not in dates[0]:
-        logging.error("FIRST PREDICTION DAY MISSING FROM HISTORY")
-        print("FIRST PREDICTION DAY MISSING FROM HISTORY")
-        exit()
-
-    dropList = []
-    for i in np.arange(len(predDays)-1):
-        for j in np.arange(len(symbols)):
-            hWI = i
-            hWF = i+np.where(dates[0]==predDays[0].date())[0][0]#98
-            #ensure the right day is being forecasted, holes could be in data
-            if predDays[i].date() != dates[j][hWF]:
-                logging.debug("Dates DONOT Match: %s vs %s"%(predDays[i].date(),dates[j][hWF]))
-                print "Dates DONOT Match: %s vs %s"%(predDays[i].date(),dates[j][hWF])
-                dropList.append(dropList)
-    predDays = predDays.delete(dropList)
-    #print len(predDays)
-    #
+    savedScores     = {}
 
     #Confirm that the day before the prediction is our last history day
     if endOfHistoricalDate.day !=  dates[0][-1].day:
@@ -185,46 +155,55 @@ if __name__ == "__main__":
         print 'We do not have previous day''s values, reject unless holiday\n'
     
     cycleTime = tt.time() #track time of each percent sim progress
-    for i in np.arange(len(predDays)):
-        #set up moving window on historical data
-        hWI = i
-        #hWI = 0
-        hWF = i+np.where(dates[0]==predDays[0].date())[0][0]#98 for ex cause 1 missing day and -1 for indexing on len 100
+    
+            
+    #SVD on each stock
+    progress  = 0
+    messageId = 0
+    for j in np.arange(len(symbols)):
 
         #print status
-        print "Simulation progress: %.0f%%, took %0.0f seconds"%(float(i+1)/float(len(predDays))*100.0, tt.time()-cycleTime)
-        cycleTime = tt.time() #track time of each percent sim progress
+        if int(float(j+1)/float(len(symbols))*100) != progress:
+            print "Simulation progress: %.1f%%, took %0.0f seconds"%(float(j+1)/float(len(symbols))*100.0, tt.time()-cycleTime)
+            progress  = int(float(j+1)/float(len(symbols))*100)
+            cycleTime = tt.time() #track time of each percent sim progress
         
-        #SVD
-        messageId = 0
-        for j in np.arange(len(symbols)):
-            #print "PRE %s"%symbols[j]
-            #Test date sync, should be n-1 on left, w. all 3 matching on both sides
-            #print dates[j][hWF-1:hWF][0], predDays[i].date()
-            
-            pHighBest, pLowBest, pOpenBest, pCloseBest, pVolumeBest = SupportVectorRegression(symbols[j],
-                                                                             [high[j][hWI:hWF],
-                                                                              low[j][hWI:hWF],
-                                                                              openPrice[j][hWI:hWF],
-                                                                              closePrice[j][hWI:hWF],
-                                                                              np.log(volume[j][hWI:hWF])],
-                                                                             genPlot = False,
-                                                                             c = 100.0, #100 is cool w 170 sec cycle
-                                                                             Gamma = 0.007,
-                                                                             Epsilon = 0.1)
-            """pHighBest, pLowBest, pOpenBest, pCloseBest, pVolumeBest = GaussianProcessRegressions(symbols[j],
-                                                                             [high[j][hWI:hWF],
-                                                                              low[j][hWI:hWF],
-                                                                              openPrice[j][hWI:hWF],
-                                                                              closePrice[j][hWI:hWF],
-                                                                              np.log(volume[j][hWI:hWF])],
-                                                                             genPlot = False)"""
-            pVolumeBest = np.exp(pVolumeBest)
-            #Save items to pred array, final item just gets passed through as no real value exists to compare with
-            if not symbols[j] in savedPrediction:
-                savedPrediction[symbols[j]] = []
-            savedPrediction[symbols[j]].append([pHighBest, pLowBest, pOpenBest, pCloseBest, pVolumeBest])
-            #print "POST %s"%symbols[j]
+        #print "PRE %s"%symbols[j]
+        #Test date sync, should be n-1 on left, w. all 3 matching on both sides
+        #print dates[j][hWF-1:hWF][0], predDays[i].date()
+        
+        pHigh, pLow, pOpen, pClose, pVolume, pHighScore, pLowScore, pOpenScore, pCloseScore, pVolumeScore = SupportVectorRegression(symbols[j],
+                                                                         [high[j],
+                                                                          low[j],
+                                                                          openPrice[j],
+                                                                          closePrice[j],
+                                                                          #volume[j]],
+                                                                          np.log(volume[j])],
+                                                                         c = 100.0, #100 is cool w 170 sec cycle
+                                                                         Gamma = 0.01, #0.007
+                                                                         Epsilon = 0.1, #0.1
+                                                                         oosd_bin_size= out_of_sameple_bin_size,
+                                                                         oosd_lookback=history_len)
+        """pHighBest, pLowBest, pOpenBest, pCloseBest, pVolumeBest = GaussianProcessRegressions(symbols[j],
+                                                                         [high[j][hWI:hWF],
+                                                                          low[j][hWI:hWF],
+                                                                          openPrice[j][hWI:hWF],
+                                                                          closePrice[j][hWI:hWF],
+                                                                          np.log(volume[j][hWI:hWF])],
+                                                                         genPlot = False)"""
+        pVolume = np.exp(pVolume)
+        #Save items to pred array, final item just gets passed through as no real value exists to compare with
+        if not symbols[j] in savedPrediction:
+            savedPrediction[symbols[j]] = []
+        if not symbols[j] in savedScores:
+            savedScores[symbols[j]] = []
+        savedPrediction[symbols[j]].append([pHigh, pLow, pOpen, pClose, pVolume])
+        savedScores[symbols[j]].append([pHighScore, pLowScore, pOpenScore, pCloseScore, pVolumeScore])
+        #print "POST %s"%symbols[j]
+
+    logging.info("\nTime of Simulation: {0:,.0f} seconds\n".format((tt.time() - startTime)))
+    print("\nTime of Simulation: {0:,.0f} seconds, {1:,.0f} minutes\n".format((tt.time() - startTime), (tt.time() - startTime)/60.0))
+    startTime = tt.time()
         
     #Check the simulation result, need to save best
 
@@ -248,60 +227,20 @@ if __name__ == "__main__":
     LOW    = 1
     VOLUME = 4
 
-    #Get the rank of each stock, measure the price diff between open & close and rank
-    rankItems = []
-    rankScore = []
-    rankIndexOriginal = []
-    for i in np.arange(len(symbols)):
-        rankItems.append(abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0))
-        R2 = np.corrcoef(np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1], closePrice[i][-NPredPast+1:])[0][1]
-        slope, intercept, r_value, p_value, std_err = stats.linregress(closePrice[i][-NPredPast+1:], np.array(savedPrediction[symbols[i]])[:,CLOSE][:-1])
-        if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.05:
-            rankScore.append(1)
-        elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-R2,abs(1.0-slope)]) > 0.05:
-            rankScore.append(2)
-        else:
-            rankScore.append(3)
-        rankIndexOriginal.append(i)
-    #rankIndex = np.array(rankItems).argsort()[::-1]
-    rankItems = np.array(rankItems)
-    rankScore = np.array(rankScore)
-
-
-    #Get the index of each accuracy group
-    indexRank1 = np.where(rankScore == 1)
-    indexRank2 = np.where(rankScore == 2)
-    indexRank3 = np.where(rankScore == 3)
-    
-    #Sort each accuracy group from high to low close price change
-    sortedIndexRank1 = rankItems[indexRank1].argsort()[::-1]
-    sortedIndexRank2 = rankItems[indexRank2].argsort()[::-1]
-    sortedIndexRank3 = rankItems[indexRank3].argsort()[::-1]
-
-    #Now we can sort the original index list by sliceing with the above groups to save symbol indicies in order of 1,2,3 accuracy
-    sortedRankIndexOriginal = np.zeros(len(rankIndexOriginal))
-    if len(sortedIndexRank1) > 0:
-        sortedRankIndexOriginal[0:len(sortedIndexRank1)] = np.array(rankIndexOriginal)[indexRank1][sortedIndexRank1]
-    if len(sortedIndexRank2) > 0:
-        sortedRankIndexOriginal[len(sortedIndexRank1):len(sortedIndexRank1)+len(sortedIndexRank2)] = np.array(rankIndexOriginal)[indexRank2][sortedIndexRank2]
-    if len(sortedIndexRank3) > 0:
-        sortedRankIndexOriginal[len(sortedIndexRank1)+len(sortedIndexRank2):len(sortedIndexRank1)+len(sortedIndexRank2)+len(sortedIndexRank3)] = np.array(rankIndexOriginal)[indexRank3][sortedIndexRank3]
-
-    #loop through the now sorted index list, and use that to fetch each symbol and apply a rank(ascending).
+    #Rank each stock based on its model score(for the close price)
     rank = {}
-    counter = 1
-    for i in sortedRankIndexOriginal:
-        rank[symbols[i]] = counter
-        counter += 1
-    """rank = {}
+    rankScore = []
+    for i in np.arange(len(symbols)):
+        rankScore.append(np.array(savedScores[symbols[i]])[:,CLOSE][0])
+    rankIndex = np.array(rankScore).argsort()[::-1]
     counter = 1
     for i in rankIndex:
         rank[symbols[i]] = counter
-        #if counter <= 10:
-        #    print symbols[i], counter, abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
-        counter += 1"""
-    
-    if platform.system() != 'Windows':
+        counter += 1
+        #print rankIndex[i]+1, symbols[i] , np.array(savedScores[symbols[i]])[:,CLOSE][0]
+    #
+        
+    if platform.system() != 'Windows' and platform.system() != 'Darwin':
         # Set the dataset from the command line parameters.
         datastore.set_options(dataset="daily-stock-forecast")
 
@@ -412,25 +351,6 @@ if __name__ == "__main__":
                         AddIntToDS(entity, 'volumeModelAccuracy', 2)
                     else:
                         AddIntToDS(entity, 'volumeModelAccuracy', 3)
-
-                    #computed values
-    #                AddFloatToDS(entity, 'openPriceChange', np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])
-    #                AddFloatToDS(entity, 'openPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,OPEN][-1] - openPrice[i][-1])/abs(openPrice[i][-1])*100.0)
-    #                AddFloatToDS(entity, 'closePriceChange', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])
-    #                AddFloatToDS(entity, 'closePriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
-    #                AddFloatToDS(entity, 'highPriceChange', np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])
-    #                AddFloatToDS(entity, 'highPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,HIGH][-1] - high[i][-1])/abs(high[i][-1])*100.0)
-    #                AddFloatToDS(entity, 'lowPriceChange', np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])
-    #                AddFloatToDS(entity, 'lowPriceChangePercent', (np.array(savedPrediction[symbols[i]])[:,LOW][-1] - low[i][-1])/abs(low[i][-1])*100.0)
-    #                AddFloatToDS(entity, 'volumeChange', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])
-    #                AddFloatToDS(entity, 'volumeChangePercent', (np.array(savedPrediction[symbols[i]])[:,VOLUME][-1] - volume[i][-1])/abs(volume[i][-1])*100.0)
-
-                    #Market snapshot
-     #               AddFloatToDS(entity, 'predOpen', np.array(savedPrediction[symbols[i]])[:,OPEN][-1])
-     #               AddFloatToDS(entity, 'predClose', np.array(savedPrediction[symbols[i]])[:,CLOSE][-1])
-     #               AddFloatToDS(entity, 'predHigh', np.array(savedPrediction[symbols[i]])[:,HIGH][-1])
-     #               AddFloatToDS(entity, 'predLow', np.array(savedPrediction[symbols[i]])[:,LOW][-1])
-     #               AddFloatToDS(entity, 'predVolume', np.array(savedPrediction[symbols[i]])[:,VOLUME][-1])
                    
                     # Execute the Commit RPC synchronously and ignore the response:
                     # Apply the insert mutation if the entity was not found and close
@@ -505,9 +425,24 @@ if __name__ == "__main__":
                     logging.error('HTTPError: %(status)s %(reason)s',
                                   {'status': e.response.status,
                                    'reason': e.response.reason})
+    else:
+        print "\nTop 25:\n\nRank\tSymbol\tCloseR2\tOpenR2\tHighR2\tLowR2\tVolumeR2"
+        for i in np.arange(len(symbols)):
+            if rank[symbols[i]] <= 25:
+                print("{0}\t{1}\t{2:0.4f}\t{3:0.3f}\t{4:0.3f}\t{5:0.3f}\t{6:0.3f}".format(rank[symbols[i]],
+                                                  symbols[i],
+                                                  np.array(savedScores[symbols[i]])[:,CLOSE][0],
+                                                  np.array(savedScores[symbols[i]])[:,OPEN][0],
+                                                  np.array(savedScores[symbols[i]])[:,HIGH][0],
+                                                  np.array(savedScores[symbols[i]])[:,LOW][0],
+                                                  np.array(savedScores[symbols[i]])[:,VOLUME][0]))
+        
+    logging.info("\nTime to Upload: {0:,.0f} seconds\n".format((tt.time() - startTime)))
+    print("\nTime to Upload: {0:,.0f} seconds, {1:,.0f} minutes\n".format((tt.time() - startTime), (tt.time() - startTime)/60.0))
+
     
-    logging.info("\nTime of Simulation: {0:,.0f} seconds\n".format((tt.time() - startTime)))
-    print("\nTime of Simulation: {0:,.0f} seconds, {1:,.0f} minutes\n".format((tt.time() - startTime), (tt.time() - startTime)/60.0))
+
+    exit()
 
     #If a small run was done, view the results.
     if len(symbols) <= 3 and platform.system() == 'Windows':

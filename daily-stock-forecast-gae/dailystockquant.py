@@ -401,11 +401,11 @@ class FavoiteHandler(webapp2.RequestHandler):
         #Init items using info from forecast, just use the first item
         dayOfForecast = now.strftime("%A, %B %d %Y")
         dof = now
-        if stockList.count() > 0:
-            for stock in stockList:
-                dayOfForecast = stock.date.strftime("%A, %B %d %Y")
-                #dof = forecast.date
-                break
+        #if stockList.count() > 0:
+        for stock in stockList:
+            dayOfForecast = stock.date.strftime("%A, %B %d %Y")
+            #dof = forecast.date
+            break
         #Form the login/logout url and a name to id the state in jinja2
         if user:
             url = users.create_logout_url(self.request.uri)
