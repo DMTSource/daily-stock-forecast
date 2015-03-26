@@ -93,11 +93,13 @@ if __name__ == "__main__":
     logging.info("Predicting %s\n"%dayToPredict.date())
     
     NPredPast             = 10
+    history_len           = 100 #days
+    saftey_days           = 10
 
     startOfPredictSim     = dayToPredict - BDay(NPredPast)
 
     endOfHistoricalDate   = dayToPredict - BDay(1)
-    startOfHistoricalDate = startOfPredictSim - BDay(101)
+    startOfHistoricalDate = startOfPredictSim - BDay(history_len+saftey_days)
     
     #Perform a guess for each prediction day
     predDays = pd.bdate_range(startOfPredictSim, dayToPredict)
@@ -131,7 +133,14 @@ if __name__ == "__main__":
                                            priceFilterLow=1.0,
                                            priceFilterHigh=1e6,
                                            minVolume=1000.0,
-                                           useThreading=True)
+                                           useThreading=True,
+                                           requiredDomain=history_len+2)
+
+    #We need to fetch extra days so we have the right # to handle the fixed dx indexing
+    if len(dates[0]) != history_len+2:
+        print "Insufficient domain, increase saftey_days."
+        print len(dates[0])
+        exit()
     
     #If no stocks in universe, exit
     if(len(symbols) == 0):
@@ -139,7 +148,7 @@ if __name__ == "__main__":
     
     #Cross validate pred against history at end of simulation
     savedPrediction = {}
-    
+
     #Check that each stock has the right domain(dates), if we cant get historical, then drop that prediction's day
     #loop trough past pred days, remove any that are not in history, dont include final day
     dropList = []
@@ -207,7 +216,7 @@ if __name__ == "__main__":
                                                                               low[j][hWI:hWF],
                                                                               openPrice[j][hWI:hWF],
                                                                               closePrice[j][hWI:hWF],
-                                                                              np.log(volume[j][hWI:hWF])],
+                                                                              volume[j][hWI:hWF]],
                                                                              genPlot = False,
                                                                              c = 100.0, #100 is cool w 170 sec cycle
                                                                              Gamma = 0.007,
@@ -219,7 +228,7 @@ if __name__ == "__main__":
                                                                               closePrice[j][hWI:hWF],
                                                                               np.log(volume[j][hWI:hWF])],
                                                                              genPlot = False)"""
-            pVolumeBest = np.exp(pVolumeBest)
+            #pVolumeBest = np.exp(pVolumeBest)
             #Save items to pred array, final item just gets passed through as no real value exists to compare with
             if not symbols[j] in savedPrediction:
                 savedPrediction[symbols[j]] = []

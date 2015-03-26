@@ -28,7 +28,7 @@ def GetStockDataWithThreading(symbol, index, d1, d2, quotes, symbols, names, ful
 
 
 
-def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False, requiredDomain=1):
+def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False):
     """
     Download historical daily data from yahoo finance
   
@@ -288,35 +288,35 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     print "Stock universe contains %d symbol(s)\n"%(len(symbols))
 
 
-    #Extract needed series for each stock, slice to ensure we get the right domain len
+    #Extract needed series from the data for returning
     dates = []
     for q in quotes:
-        dates.append(q.date[-requiredDomain:])
+        dates.append(q.date)
     dates = np.array(dates)
     
     high = []
     for q in quotes:
-        high.append(q.high[-requiredDomain:])
+        high.append(q.high)
     high = np.array(high)
 
     low = []
     for q in quotes:
-        low.append(q.low[-requiredDomain:])
+        low.append(q.low)
     low = np.array(low)
 
     openPrice = []
     for q in quotes:
-        openPrice.append(q.open[-requiredDomain:])
+        openPrice.append(q.open)
     openPrice = np.array(openPrice)
 
     closePrice = []
     for q in quotes:
-        closePrice.append(q.close[-requiredDomain:])
+        closePrice.append(q.close)
     closePrice = np.array(closePrice)
 
     volume = []
     for q in quotes:
-        volume.append(q.volume[-requiredDomain:])
+        volume.append(q.volume)
     volume = np.array(volume)
 
     return symbols, names, exchanges, sectors, industries, dates, high, low, openPrice, closePrice, volume

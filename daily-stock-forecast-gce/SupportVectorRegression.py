@@ -13,6 +13,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import time
 from sklearn.svm import SVR
+from sklearn import grid_search
+from sklearn import preprocessing
 
 def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], indexId=0, useThreading=False, c=100, Gamma=0.01, Epsilon=0.1): # returnList, indexId,
     """
@@ -44,24 +46,64 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
     
     for series in seriesSet:
 
-        X = np.arange(series.shape[0])
-        X = np.atleast_2d(X).T
-        y = series
+        """ Data Configuration & Preprocessing """
+        # What features does our model have? We can pick from the bar(open, close, high, low, volume)
+        trainingVectors       = np.zeros((series.shape[0]-2, 5),dtype=np.float32)
+        trainingVectors[:, 0] = seriesSet[0][:-2]
+        trainingVectors[:, 1] = seriesSet[1][:-2]
+        trainingVectors[:, 2] = seriesSet[2][:-2]
+        trainingVectors[:, 3] = seriesSet[3][:-2]
+        trainingVectors[:, 4] = seriesSet[4][:-2]
         
-        startTime = time.time()
-        # Mesh the input space for evaluations of the real function, the prediction and
-        # its MSE
-        x = np.atleast_2d(np.linspace(len(series), len(series), 1.0)).T
+        # create our scaling transformer to achieve a zero mean and unit variance(std=1). Scale the training data with it.
+        scaler0               = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(trainingVectors[:, 0])
+        scaler1               = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(trainingVectors[:, 1])
+        scaler2               = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(trainingVectors[:, 2])
+        scaler3               = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(trainingVectors[:, 3])
+        scaler4               = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(trainingVectors[:, 4])
+        
+        # Apply the scale transform
+        trainingVectors[:, 0] = scaler0.transform(trainingVectors[:, 0])
+        trainingVectors[:, 1] = scaler1.transform(trainingVectors[:, 1])
+        trainingVectors[:, 2] = scaler2.transform(trainingVectors[:, 2])
+        trainingVectors[:, 3] = scaler3.transform(trainingVectors[:, 3])
+        trainingVectors[:, 4] = scaler4.transform(trainingVectors[:, 4])
 
-        #kernel='rbf', ‘linear’, ‘poly’, ‘sigmoid’, ‘precomputed’
-        SVR_model = SVR(kernel='rbf',C=c,gamma=Gamma, epsilon=Epsilon)
+        # Target values, we want to use ^ yesterdays bar to predict this day's close price. Use close scaler????????
+        targetValues          = np.zeros((series.shape[0], ),dtype=np.float32)
+        targetValues          = series[1:-1]
+        scalerTarget          = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(targetValues)
+        targetValues          = scalerTarget.transform(targetValues)
+                
+        # Test Samples, scaled using the feature training scaler
+        testSamples           = np.zeros((1, 5), dtype=np.float32)
+        testSamples[:, 0]     = seriesSet[0][-1]
+        testSamples[:, 0]     = scaler0.transform(testSamples[:, 0])
+        testSamples[:, 1]     = seriesSet[1][-1]
+        testSamples[:, 1]     = scaler1.transform(testSamples[:, 1])
+        testSamples[:, 2]     = seriesSet[2][-1]
+        testSamples[:, 2]     = scaler2.transform(testSamples[:, 2])
+        testSamples[:, 3]     = seriesSet[3][-1]
+        testSamples[:, 3]     = scaler3.transform(testSamples[:, 3])
+        testSamples[:, 4]     = seriesSet[4][-1]
+        testSamples[:, 4]     = scaler4.transform(testSamples[:, 4])
         
- 
-        # Fit to data using Maximum Likelihood Estimation of the parameters
-        SVR_model.fit(X,y)
+        """ Training Weight """
+        weight_training = np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 2)/ \
+                          np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 2).max()
         
-        # Make the prediction on the meshed x-axis (ask for MSE as well)
-        y_pred = SVR_model.predict(x)
+        """ Model Optommization """
+        parameters    = {'kernel':('linear', 'rbf'),'C':[1, 10, 100], 'gamma': np.logspace(-2, 1, 4)} #'kernel':('linear', 'rbf'),
+        SVR_model     = SVR()
+        clf           = grid_search.GridSearchCV(SVR_model, parameters)
+        clf.fit(trainingVectors, targetValues)
+        
+        """ Forecast next close price """
+        #y_predSVR     = clf.predict(testSamples) [0]
+        SVR_model     = SVR(C=clf.best_params_["C"], gamma=clf.best_params_["gamma"]) #kernel=clf.best_params_["kernel"]
+        #SVR_model     = SVR(C=1, gamma=0.001) #kernel=clf.best_params_["kernel"]
+        SVR_model.fit(trainingVectors, targetValues, weight_training)
+        y_pred     = scalerTarget.inverse_transform(SVR_model.predict(testSamples))[0]
 
         """print len(X)
         print X
@@ -107,4 +149,4 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
     if useThreading:
         returnItems = [indexId, [predictionSets[0][lookBack:].mean(), predictionSets[1][lookBack:].mean(), predictionSets[2][lookBack:].mean(), predictionSets[3][lookBack:].mean(), predictionSets[4][lookBack:].mean()]]
     else:
-        return predictionSets[0][lookBack:].mean(), predictionSets[1][lookBack:].mean(), predictionSets[2][lookBack:].mean(), predictionSets[3][lookBack:].mean(), predictionSets[4][lookBack:].mean()
+        return predictionSets[0], predictionSets[1], predictionSets[2], predictionSets[3], predictionSets[4]
