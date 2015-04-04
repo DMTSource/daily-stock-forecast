@@ -89,11 +89,11 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
         testSamples[:, 4]     = scaler4.transform(testSamples[:, 4])
         
         """ Training Weight """
-        weight_training = np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 2)/ \
-                          np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 2).max()
+        weight_training = np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 1)/ \
+                          np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 1).max()
         
         """ Model Optommization """
-        parameters    = {'kernel':('linear', 'rbf'),'C':[1, 10, 100], 'gamma': np.logspace(-2, 1, 4)} #'kernel':('linear', 'rbf'),
+        parameters    = {'C':[1, 10, 100], 'gamma': np.logspace(-2, 1, 4)} #'kernel':('linear', 'rbf'),
         SVR_model     = SVR()
         clf           = grid_search.GridSearchCV(SVR_model, parameters)
         clf.fit(trainingVectors, targetValues)
