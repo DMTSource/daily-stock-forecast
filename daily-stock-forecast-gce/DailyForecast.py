@@ -93,8 +93,8 @@ if __name__ == "__main__":
     logging.info("Predicting %s\n"%dayToPredict.date())
     
     NPredPast             = 10
-    history_len           = 100 #days
-    saftey_days           = 10
+    history_len           = 50 #days
+    saftey_days           = 5
 
     startOfPredictSim     = dayToPredict - BDay(NPredPast)
 
