@@ -28,7 +28,7 @@ def GetStockDataWithThreading(symbol, index, d1, d2, quotes, symbols, names, ful
 
 
 
-def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False, requiredDomain=1):
+def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, fullIndustry, date1, date2, priceFilterLow=0.0, priceFilterHigh=1e9, minVolume=0.0, useThreading=False, requiredDomain=1, verbose=False):
     """
     Download historical daily data from yahoo finance
   
@@ -74,7 +74,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     badDataIndx = np.empty((len(fullSymbols),), dtype=int)
     threads     = []
 
-    print "Starting historical download."
+    if verbose:
+        print "Starting historical download."
 
 
     numCPU = 64.0
@@ -82,7 +83,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     while((len(fullSymbols)-offset)%numCPU != 0.0):
         offset += 1
     numberOfLoops = (len(fullSymbols)-offset)/numCPU
-    print "%d blocks with %d threads\n"%(numCPU, numberOfLoops)
+    if verbose:
+        print "%d blocks with %d threads\n"%(numCPU, numberOfLoops)
 
     if(numCPU==1):
         useThreading = False
@@ -144,7 +146,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     exchanges = np.delete(exchanges,badDataIndx)
     sectors = np.delete(sectors,badDataIndx)
     industries = np.delete(industries,badDataIndx)
-    print "Failed to download %d of %d symbols"%(len(badDataIndx), len(fullSymbols))
+    if verbose:
+        print "Failed to download %d of %d symbols"%(len(badDataIndx), len(fullSymbols))
     
 
     #Covert to vertical array(ease of use for numpy and machine learning)
@@ -153,8 +156,9 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     exchanges  = np.array(exchanges).T
     sectors  = np.array(sectors).T
     industries  = np.array(industries).T
-    
-    print "Completing historical download."
+
+    if verbose:
+        print "Completing historical download."
 
     #remove none types
     counterBadDim1 = 0
@@ -175,7 +179,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "NoneType returned for %d of %d symbols"%(counterBadDim1, len(fullSymbols))
+    if verbose:
+        print "NoneType returned for %d of %d symbols"%(counterBadDim1, len(fullSymbols))
 
     #remove stocks that dont have the full history(non matching dimensions)
     mode = stats.mode(np.array([len(q) for q in quotes]))[0][0]
@@ -198,7 +203,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "Bad dimension for additional %d of %d symbol"%(counterBadDim2, len(symbols)+counterBadDim2)
+    if verbose:
+        print "Bad dimension for additional %d of %d symbol"%(counterBadDim2, len(symbols)+counterBadDim2)
 
 
     # check ahead of time for bad values to prevent breaking the fit with bad division of std in next step
@@ -221,7 +227,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "INF/NAN error for %d of %d symbol"%(counterBadDim3, len(symbols)+counterBadDim3)
+    if verbose:
+        print "INF/NAN error for %d of %d symbol"%(counterBadDim3, len(symbols)+counterBadDim3)
 
     # Filter the companies by stock price range. Avoid mem error and over plot
     counterBadDim4 = 0
@@ -242,7 +249,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "Price range filterd %d of %d symbol"%(counterBadDim4, len(symbols)+counterBadDim4)
+    if verbose:
+        print "Price range filterd %d of %d symbol"%(counterBadDim4, len(symbols)+counterBadDim4)
 
     # Filter the companies by MISSING volume.
     counterBadDim5 = 0
@@ -263,7 +271,8 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "Volume missing filterd %d of %d symbol"%(counterBadDim5, len(symbols)+counterBadDim5)
+    if verbose:
+        print "Volume missing filterd %d of %d symbol"%(counterBadDim5, len(symbols)+counterBadDim5)
 
     # Filter the companies by min mean volume.
     counterBadDim6 = 0
@@ -284,8 +293,9 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
         sectors = np.delete(sectors,badIndex)
         industries = np.delete(industries,badIndex)
     #
-    print "Volume Minimum filterd %d of %d symbol"%(counterBadDim6, len(symbols)+counterBadDim6)
-    print "Stock universe contains %d symbol(s)\n"%(len(symbols))
+    if verbose:
+        print "Volume Minimum filterd %d of %d symbol"%(counterBadDim6, len(symbols)+counterBadDim6)
+        print "Stock universe contains %d symbol(s)\n"%(len(symbols))
 
 
     #Extract needed series for each stock, slice to ensure we get the right domain len
@@ -318,5 +328,6 @@ def GetHistoricalFromYahoo(fullSymbols, fullNames, fullExchange, fullSector, ful
     for q in quotes:
         volume.append(q.volume[-requiredDomain:])
     volume = np.array(volume)
+
 
     return symbols, names, exchanges, sectors, industries, dates, high, low, openPrice, closePrice, volume

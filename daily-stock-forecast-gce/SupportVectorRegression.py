@@ -48,8 +48,23 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
 
         """ Data Configuration & Preprocessing """
         # What features does our model have? We can pick from the bar(open, close, high, low, volume)
-        trainingVectors       = np.zeros((series.shape[0]-2, 5),dtype=np.float32)
-        trainingVectors[:, 0] = seriesSet[0][:-2]
+        trainingVectors       = np.zeros((series.shape[0]-1, 5),dtype=np.float32)
+        testSamples           = np.zeros((1, 5), dtype=np.float32)
+        
+        scalers = []
+        count = 0
+        features = [0,1,2,3,4]
+        for i in features:
+            dataToScale               = seriesSet[i]
+            scalers.append(preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(dataToScale))
+            scaledData                = scalers[count].transform(dataToScale)
+            
+            trainingVectors[:, count] = scaledData[:-1]
+            
+            testSamples[:, count]     = scaledData[-1]
+            count += 1
+
+        """trainingVectors[:, 0] = seriesSet[0][:-2]
         trainingVectors[:, 1] = seriesSet[1][:-2]
         trainingVectors[:, 2] = seriesSet[2][:-2]
         trainingVectors[:, 3] = seriesSet[3][:-2]
@@ -67,16 +82,16 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
         trainingVectors[:, 1] = scaler1.transform(trainingVectors[:, 1])
         trainingVectors[:, 2] = scaler2.transform(trainingVectors[:, 2])
         trainingVectors[:, 3] = scaler3.transform(trainingVectors[:, 3])
-        trainingVectors[:, 4] = scaler4.transform(trainingVectors[:, 4])
+        trainingVectors[:, 4] = scaler4.transform(trainingVectors[:, 4])"""
 
         # Target values, we want to use ^ yesterdays bar to predict this day's close price. Use close scaler????????
-        targetValues          = np.zeros((series.shape[0], ),dtype=np.float32)
-        targetValues          = series[1:-1]
+        targetValues          = np.zeros((series.shape[0]-1, ),dtype=np.float32)
+        targetValues[:]       = series[1:]
         scalerTarget          = preprocessing.MinMaxScaler(feature_range=(-1, 1)).fit(targetValues)
-        targetValues          = scalerTarget.transform(targetValues)
+        targetValues[:]       = scalerTarget.transform(targetValues)
                 
         # Test Samples, scaled using the feature training scaler
-        testSamples           = np.zeros((1, 5), dtype=np.float32)
+        """testSamples           = np.zeros((1, 5), dtype=np.float32)
         testSamples[:, 0]     = seriesSet[0][-1]
         testSamples[:, 0]     = scaler0.transform(testSamples[:, 0])
         testSamples[:, 1]     = seriesSet[1][-1]
@@ -86,14 +101,14 @@ def SupportVectorRegression(symbol, seriesSet, genPlot=False, returnItems=[], in
         testSamples[:, 3]     = seriesSet[3][-1]
         testSamples[:, 3]     = scaler3.transform(testSamples[:, 3])
         testSamples[:, 4]     = seriesSet[4][-1]
-        testSamples[:, 4]     = scaler4.transform(testSamples[:, 4])
+        testSamples[:, 4]     = scaler4.transform(testSamples[:, 4])"""
         
         """ Training Weight """
         weight_training = np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 1)/ \
                           np.power(np.arange(1, targetValues.shape[0]+1,dtype=float), 1).max()
         
         """ Model Optommization """
-        parameters    = {'C':[1, 10, 100], 'gamma': np.logspace(-2, 1, 4)} #'kernel':('linear', 'rbf'),
+        parameters    = {'C':[1, 10, 100], 'gamma': np.logspace(-3, -1, 3)} #'kernel':('linear', 'rbf'),
         SVR_model     = SVR()
         clf           = grid_search.GridSearchCV(SVR_model, parameters)
         clf.fit(trainingVectors, targetValues)

@@ -93,8 +93,8 @@ if __name__ == "__main__":
     logging.info("Predicting %s\n"%dayToPredict.date())
     
     NPredPast             = 10
-    history_len           = 50 #days
-    saftey_days           = 5
+    history_len           = 100 #days
+    saftey_days           = 10
 
     startOfPredictSim     = dayToPredict - BDay(NPredPast)
 
@@ -134,10 +134,11 @@ if __name__ == "__main__":
                                            priceFilterHigh=1e6,
                                            minVolume=1000.0,
                                            useThreading=True,
-                                           requiredDomain=history_len+2)
+                                           requiredDomain=history_len+1,
+                                           verbose=True)
 
     #We need to fetch extra days so we have the right # to handle the fixed dx indexing
-    if len(dates[0]) != history_len+2:
+    if len(dates[0]) != history_len+1:
         print "Insufficient domain, increase saftey_days."
         print len(dates[0])
         exit()
@@ -302,13 +303,6 @@ if __name__ == "__main__":
     for i in sortedRankIndexOriginal:
         rank[symbols[i]] = counter
         counter += 1
-    """rank = {}
-    counter = 1
-    for i in rankIndex:
-        rank[symbols[i]] = counter
-        #if counter <= 10:
-        #    print symbols[i], counter, abs((np.array(savedPrediction[symbols[i]])[:,CLOSE][-1] - closePrice[i][-1])/abs(closePrice[i][-1])*100.0)
-        counter += 1"""
     
     if platform.system() != 'Windows':
         # Set the dataset from the command line parameters.
@@ -523,8 +517,8 @@ if __name__ == "__main__":
         for i in np.arange(len(symbols)):
 
             
-            labels = ["High","Low","Open","Close"]
-            colors = ["r","g","b","c"]
+            labels = ["High","Low","Open","Close", "Volume"]
+            colors = ["r","g","b","c", "o"]
             
             fig = plt.figure()
             #plt.subplots_adjust(left=0.12, bottom=0.06, right=0.90, top=0.96, wspace=0.20, hspace=0.08)
