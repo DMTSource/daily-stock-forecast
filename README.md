@@ -18,7 +18,7 @@ Screenshots of Daily Stock Forecast live and in action:<br />
 Features
 ========
 
-* Transparency of results. Each forecast comes with a 90 day performance
+* Transparency of results. Each forecast comes with a 10 day performance
 analysis to expose the Slope and R2 values of past predictions for each
 metric. Additonaly, you can mouse over each histogram bar to see that 
 metrics correlation scatter plot.
@@ -41,12 +41,8 @@ Key files in the application hierarchy.
     * indexOld.html (Current website homepage, loaded into above script w/ Jinja2 templating)
     * index.html (In development Polymer version of site)
   * forecast.py (Cron job to launch a compute engine instance to perform the forecast automatically each business day) 
-* daily-stock-forecast-gce
-  * DailyForecast.py (Runs the forecast, publishes to datastore)
-    * GaussianProcess.py (Machine learning regression model, not applied to forecast currently)
-    * GetHistoricalFromYahoo.py (Download the historical values for each stock in the universe)
-    * GetSymbols.py (Use Nasdaq website to download list of stocks from 3 exchanges)
-    * SupportVectorRegression.py (Machine learning regression model)
+* daily-stock-forecast-gce3
+  * DailyForecast.py (Download historical data, runs the forecast, publishes to datastore)
 
 Installation
 ============
@@ -71,6 +67,12 @@ Dependencies
 * googledatastore
 * Polymer (0.5.2+)
 
+Usage
+------------
+To run the forecast you must configure gcloud to the correct project and then you can run:,<br />
+python DailyForecast.py # use 1 cpu,<br />
+python -m scoop DailyForecast.py # Use all cpu,<br />
+python -m scoop -n 16 DailyForecast.py # Use only 16 cpu,<br />
 
 Credits
 ============
