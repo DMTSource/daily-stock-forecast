@@ -6,6 +6,7 @@
 import time
 import datetime
 from pytz import timezone
+import webbrowser
 
 import numpy as np
 import pandas as pd
@@ -17,8 +18,10 @@ from pandas.tseries.offsets import BDay
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
-#from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import ARDRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import RandomizedSearchCV
+from sklearn.neural_network import MLPRegressor
 
 from google.cloud import datastore
 
@@ -65,7 +68,10 @@ class Data():
             symbols_combined   = pd.concat([nasdaq, nyse, amex])
 
             # Filter by market cap to focus on liquid assets
-            symbol_list = symbols_combined.Symbol[symbols_combined.MarketCap > 5e8].values
+            #symbol_list = symbols_combined.Symbol[symbols_combined.MarketCap > 1e11].values
+            # Top N by market cap
+            symbol_list = symbols_combined.sort_values('MarketCap').Symbol.tail(1000).values
+            
     
             self.symbols = list(symbol_list)
             elapsed_time = time.time() - start_time
@@ -74,7 +80,7 @@ class Data():
         else:
             self.symbols = list(symbol_universe)
 
-        self.hist_len = 252*2
+        self.hist_len = 252*4
         self.end   = datetime.datetime.now(tz=timezone('US/Eastern')) + BDay(0) # Last full business day
         self.start = self.end - BDay(self.hist_len+self.hist_len*0.1)
 
@@ -83,7 +89,13 @@ class Data():
         print('Universe download complete.')
 
         #new_index = self.hist[self.hist.keys()[0]].index[-self.hist_len:]
+        print self.hist.keys()
+        """print self.hist.keys()
+        print self.hist.keys()[0]
+        print self.hist[self.hist.keys()[0]].index
+        print self.hist[self.hist.keys()[0]].index.length"""
         self.new_index = self.hist[self.hist.keys()[0]].index[-self.hist_len:]
+        #self.new_index = self.hist['AAPL'].index[-self.hist_len:]
 
         self.close_prices = pd.DataFrame(index = self.new_index, columns=self.hist.keys())
         self.open_prices  = pd.DataFrame(index = self.new_index, columns=self.hist.keys())
@@ -159,14 +171,17 @@ class Data():
         print('Downloading\t\"%s\"'%symbol.strip())
         f = None
         try:
-            f = web.DataReader(symbol.strip(), 'yahoo', self.start, self.end)
+            #f = web.DataReader(symbol.strip(), 'yahoo', self.start, self.end)
+            f = web.DataReader(symbol.strip(), 'google', self.start, self.end)
+
             if len(f.index) < self.hist_len: #required domain check
                 self.symbols.remove(symbol)
                 #print 1, symbol
+                print "Failed to download enough history for: %s"%symbol
                 return None, None
             return symbol, f
         except:
-            #print "Failed to download: %s"%symbol
+            print "Failed to download: %s"%symbol
             # A None return will be scrubbed out before saving to hist dictionary
             #print 2,symbol
             self.symbols.remove(symbol)
@@ -175,7 +190,7 @@ class Data():
     def get_universe(self):
         # Download historical data for our universe
         key_value_pairs = list(futures.map(self.get_historical, self.symbols))
-        #key_value_pairs = map(self.get_historical, self.symbols)
+        #key_value_pairs = list(map(self.get_historical, self.symbols))
 
         #key_value_pairs.remove((None, None)) # remove any failed items
         if (None, None) in key_value_pairs:
@@ -186,26 +201,60 @@ class Data():
             del self.hist[None]
 
 def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
-    series_to_model = [close_prices, open_prices, high_prices, low_prices, volume]
+    
+    series_raw = [close_prices, 
+                   open_prices, 
+                   high_prices, 
+                   low_prices, 
+                   volume]
+    # features based on log returns
+    series_to_model = series_raw
+    """[
+           np.append([0.0], np.log(close_prices[1:]/close_prices[:-1])), 
+           np.append([0.0], np.log(open_prices[1:]/open_prices[:-1])), 
+           np.append([0.0], np.log(high_prices[1:]/high_prices[:-1])), 
+           np.append([0.0], np.log(low_prices[1:]/low_prices[:-1])), 
+           np.append([0.0], np.log(volume[1:]/volume[:-1]))
+       ]"""
+
     series_to_return = []
-    for series in series_to_model:
+    for i_series, series in enumerate(series_to_model):
         
-        # Input to our model will consist of a 2d 'image' spanning historica data and each candle feature
-        window     = 10 # days in window
+        """# Input to our model will consist of a 2d 'image' spanning historica data and each candle feature
+        window     = 5 # days in window
         n_features = 5   # each item in the candle
         samples    = np.zeros((len(series)-window, window*n_features), dtype=np.float32)
         for i in np.arange(samples.shape[0]):
             aggregate = []
             for j,series2 in enumerate(series_to_model):
                 if j!=4:
-                    aggregate.append(series2[i:i+window])
+                    s = series2[i:i+window]
+                    #s[np.where(s == np.nan)] = 0.0 # scrub nans from log return calc
+                    #s[np.where(s == np.inf)] = 0.0 # scrub inf from log return calc(volume blowout?)
+                    #s[np.where(s == -np.inf)] = 0.0 # scrub -inf from log return calc(volume blowout?)
+                    aggregate.append(s)
                 else:
                     # Scale the volume to close price range pre standardization
                     aggregate.append(series_to_model[0][i+window-1]*series2[i:i+window]/series2.max())
-            samples[i, :] = np.array(aggregate).flatten()
+            samples[i, :] = np.array(aggregate).flatten()"""
+
+        # Input is the log returns
+        window     = 5 # days in window
+        #log_returns = np.append( [0.0], np.diff(np.log(series)))
+        #log_returns[np.where(log_returns == np.nan)]  = 0.0 # scrub nans from log return calc
+        #log_returns[np.where(log_returns == np.inf)]  = 0.0 # scrub inf from log return calc(volume blowout?)
+        #log_returns[np.where(log_returns == -np.inf)] = 0.0 # scrub -inf from log return calc(volume blowout?)
+        #try:
+        samples     = [series[i-window:i] for i in np.arange(window, len(series))]
+        #except:
+        #    print close_prices, open_prices, high_prices, low_prices, volume
+        #    exit()
 
         # Training Labels, leave out first day to shift ahead by 1 from training input
+        #labels        = series_raw[i_series][window+1:] #Shift ahead by 1 for next day regression
         labels        = series[window+1:] #Shift ahead by 1 for next day regression
+
+        samples = StandardScaler().fit_transform(samples)
 
         # Split the data into test/train
         X_train, X_test, y_train, y_test = train_test_split(samples[:-10], labels[:-9], train_size=0.8, random_state=622)
@@ -215,11 +264,11 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
 
         # Standardize the data. We desire Zero Mean Unit Variance to prevent scaling issues in hyperplane.
         # http://scikit-learn.org/stable/modules/svm.html#svm-regression
-        series_scaler = StandardScaler().fit(X_train)
+        """series_scaler = StandardScaler().fit(X_train)
         X_train        = series_scaler.transform(X_train)
         X_test         = series_scaler.transform(X_test)
         X_validate     = series_scaler.transform(X_validate)
-        X_forecast     = series_scaler.transform(X_forecast)
+        X_forecast     = series_scaler.transform(X_forecast)"""
 
         # Perform a random search to optimize hyperparameters
         # (we cant afford an exhaustive grid search so random helps us reduce steps)
@@ -227,17 +276,17 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
         # http://scikit-learn.org/stable/modules/svm.html#svm-regression
         param_dist = {"C": np.logspace(-5,1,7),
                       "epsilon": np.logspace(-6,-1,6),
-                      #"kernel": ['linear','poly','rbf','sigmoid'],
+                      "kernel": ['linear','poly','rbf','sigmoid'],
                       "kernel": ['linear','rbf'],
                       "degree": np.linspace(1,4,4,dtype=int),
                       #"gamma": np.logspace(-8,-4,5),
                       "coef0": np.logspace(-8,-4,5),
                       "shrinking": [True, False],
-                      "tol": np.logspace(-5,-2,4),
+                      "tol": np.logspace(-4,-2,3),
                       "cache_size": [100000.],
                       #"max_iter": [True, False],
                       }
-        model_template = SVR()
+        model_template = SVR(max_iter=5e5)
         """param_dist = {"n_estimators": np.linspace(1,25,20,dtype=int),
                       "criterion": ['mse','mae'],
                       "max_features": ['auto','sqrt','log2'],
@@ -252,7 +301,7 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
                       #"random_state": [True, False],
                       "warm_start": [True, False],
                       }
-        model_template = RandomForestRegressor(n_jobs=1)"""
+        model_template = RandomForestRegressor(n_jobs=1)""" # causes mem exp?
 
         # run randomized search
         n_iter_search = 25
@@ -261,11 +310,13 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
                                            n_iter=n_iter_search,
                                            n_jobs=1, # Should be 1, unless you use something like scoop+SGE and run on nodes with cpu > 1
                                            random_state=622)
-
-        random_search.fit(X_train, y_train)
+        #random_search = ARDRegression(tol=1e-1)
+        #random_search = MLPRegressor(hidden_layer_sizes=(10,),max_iter=int(1e5))
+        #random_search.fit(X_train, y_train)
 
         # Utilize the best model to perform forecasts(test and validation)
-        model = random_search.best_estimator_
+        model = random_search#.best_estimator_
+        model.fit(X_train, y_train)
         test_inference     = model.predict(X_test)
         validate_inference = model.predict(X_validate)
         forecast_inference = model.predict(X_forecast)
@@ -273,6 +324,7 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
         series_to_return.append(np.append(validate_inference, forecast_inference))
 
         # Analysis
+        print "Score Test: %0.2f\tScore Validate: %0.2f"%(model.score(X_test, y_test), model.score(X_validate, y_validate)) 
         """print model.score(X_test, y_test)
         print model.score(X_validate, y_validate)
         print validate_inference
@@ -365,9 +417,9 @@ if __name__ == "__main__":
         rankItems.append(abs((np.array(savedPrediction[data.symbols[i]])[:,CLOSE][-1] - data.close_prices[data.symbols[i]][-1])/abs(data.close_prices[data.symbols[i]][-1])*100.0))
         R2 = np.corrcoef(np.array(savedPrediction[data.symbols[i]])[:,CLOSE][:-1], data.close_prices[data.symbols[i]][-NPredPast+1:])[0][1]
         slope, intercept, r_value, p_value, std_err = stats.linregress(data.close_prices[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,CLOSE][:-1])
-        if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.05:
+        if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.3:
             rankScore.append(1)
-        elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-R2,abs(1.0-slope)]) > 0.05:
+        elif np.mean([1.0-R2,abs(1.0-slope)]) <= 0.6 and np.mean([1.0-R2,abs(1.0-slope)]) > 0.3:
             rankScore.append(2)
         else:
             rankScore.append(3)
@@ -402,6 +454,21 @@ if __name__ == "__main__":
     for i in sortedRankIndexOriginal:
         rank[data.symbols[int(i)]] = counter
         counter += 1
+
+
+    # We need to first prepare the DataStore for a new days data.
+    # http://stackoverflow.com/questions/22445217/python-webbrowser-open-to-open-chrome-browser
+    url = 'daily-stock-forecast.com/cleards'
+    # MacOS
+    #chrome_path = 'open -a /Applications/Google\ Chrome.app %s'
+    # Windows
+    # chrome_path = 'C:\Program Files (x86)\Google\Chrome\Application\chrome.exe %s'
+    # Linux
+    chrome_path = '/usr/bin/google-chrome %s'
+    webbrowser.get(chrome_path).open(url)
+    print('\nWaiting 30 sec to ensure DS Prep...')
+    time.sleep(30)
+
     
     # Set the dataset from the command line parameters.
     #datastore.set_options(dataset="daily-stock-forecast")
@@ -476,45 +543,45 @@ if __name__ == "__main__":
             #print len(openPrice[i][-NPredPast+1:]), len( np.array(savedPrediction[symbols[i]])[:,OPEN][:-1])
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.open_prices[data.symbols[i]].values[-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,OPEN][:-1])
             entity['openPredSlope'] = float('%0.2f'%slope)
-            if np.mean([1.0-openR2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-openR2,abs(1.0-slope)]) <= 0.3:
                 entity['openModelAccuracy'] = 1
-            elif np.mean([1.0-openR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-openR2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-openR2,abs(1.0-slope)]) < 0.6 and np.mean([1.0-openR2,abs(1.0-slope)]) > 0.3:
                 entity['openModelAccuracy'] = 2
             else:
                 entity['openModelAccuracy'] = 3
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.close_prices[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,CLOSE][:-1])
             entity['closePredSlope'] = float('%0.2f'%slope)
-            if np.mean([1.0-closeR2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-closeR2,abs(1.0-slope)]) <= 0.3:
                 entity['closeModelAccuracy'] = 1
-            elif np.mean([1.0-closeR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-closeR2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-closeR2,abs(1.0-slope)]) < 0.6 and np.mean([1.0-closeR2,abs(1.0-slope)]) > 0.3:
                 entity['closeModelAccuracy'] = 2
             else:
                 entity['closeModelAccuracy'] = 3
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.high_prices[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,HIGH][:-1])
             entity['highPredSlope'] = float('%0.2f'%slope)
-            if np.mean([1.0-highR2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-highR2,abs(1.0-slope)]) <= 0.3:
                 entity['highModelAccuracy'] = 1
-            elif np.mean([1.0-highR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-highR2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-highR2,abs(1.0-slope)]) < 0.6 and np.mean([1.0-highR2,abs(1.0-slope)]) > 0.3:
                 entity['highModelAccuracy'] = 2
             else:
                 entity['highModelAccuracy'] = 3
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.low_prices[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,LOW][:-1])
             entity['lowPredSlope'] = float('%0.2f'%slope)
-            if np.mean([1.0-lowR2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-lowR2,abs(1.0-slope)]) <= 0.3:
                 entity['lowModelAccuracy'] = 1
-            elif np.mean([1.0-lowR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-lowR2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-lowR2,abs(1.0-slope)]) < 0.6 and np.mean([1.0-lowR2,abs(1.0-slope)]) > 0.3:
                 entity['lowModelAccuracy'] = 2
             else:
                 entity['lowModelAccuracy'] = 3
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.volume[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,VOLUME][:-1])
             entity['volumePredSlope'] = float('%0.2f'%slope)
-            if np.mean([1.0-volR2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-volR2,abs(1.0-slope)]) <= 0.3:
                 entity['volumeModelAccuracy'] = 1
-            elif np.mean([1.0-volR2,abs(1.0-slope)]) < 0.1 and np.mean([1.0-volR2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-volR2,abs(1.0-slope)]) < 0.6 and np.mean([1.0-volR2,abs(1.0-slope)]) > 0.3:
                 entity['volumeModelAccuracy'] = 2
             else:
                 entity['volumeModelAccuracy'] = 3
@@ -591,9 +658,9 @@ if __name__ == "__main__":
 
             R2 = np.corrcoef(np.array(savedPrediction[data.symbols[i]])[:,CLOSE][:-1], data.close_prices[data.symbols[i]][-NPredPast+1:])[0][1]
             slope, intercept, r_value, p_value, std_err = stats.linregress(data.close_prices[data.symbols[i]][-NPredPast+1:], np.array(savedPrediction[data.symbols[i]])[:,CLOSE][:-1])
-            if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.05:
+            if np.mean([1.0-R2,abs(1.0-slope)]) <= 0.3:
                 entity['modelAccuracy'] = 1
-            elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.1 and np.mean([R2,abs(1.0-slope)]) > 0.05:
+            elif np.mean([1.0-R2,abs(1.0-slope)]) < 0.6 and np.mean([R2,abs(1.0-slope)]) > 0.3:
                 entity['modelAccuracy'] = 2
             else:
                 entity['modelAccuracy'] = 3
