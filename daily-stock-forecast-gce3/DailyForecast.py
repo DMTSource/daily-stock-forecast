@@ -70,7 +70,7 @@ class Data():
             # Filter by market cap to focus on liquid assets
             #symbol_list = symbols_combined.Symbol[symbols_combined.MarketCap > 1e11].values
             # Top N by market cap
-            symbol_list = symbols_combined.sort_values('MarketCap').Symbol.tail(1000).values
+            symbol_list = symbols_combined.sort_values('MarketCap').Symbol.tail(100).values
             
     
             self.symbols = list(symbol_list)
@@ -164,12 +164,13 @@ class Data():
         self.open_prices[stock]  = self.hist[stock].Open[self.new_index].astype(np.float32)
         self.high_prices[stock]  = self.hist[stock].High[self.new_index].astype(np.float32)
         self.low_prices[stock]   = self.hist[stock].Low[self.new_index].astype(np.float32)
-        self.volume[stock]       = self.hist[stock].Volume[self.new_index].astype(np.float32)
+        self.volume[stock]       = self.hist[stock].Volume[self.new_index].astype(np.float32).log()
         return None
 
     def get_historical(self, symbol):
         print('Downloading\t\"%s\"'%symbol.strip())
         f = None
+
         try:
             #f = web.DataReader(symbol.strip(), 'yahoo', self.start, self.end)
             f = web.DataReader(symbol.strip(), 'google', self.start, self.end)
@@ -189,8 +190,8 @@ class Data():
 
     def get_universe(self):
         # Download historical data for our universe
-        key_value_pairs = list(futures.map(self.get_historical, self.symbols))
-        #key_value_pairs = list(map(self.get_historical, self.symbols))
+        #key_value_pairs = list(futures.map(self.get_historical, self.symbols))
+        key_value_pairs = list(map(self.get_historical, self.symbols))
 
         #key_value_pairs.remove((None, None)) # remove any failed items
         if (None, None) in key_value_pairs:
@@ -239,36 +240,51 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
             samples[i, :] = np.array(aggregate).flatten()"""
 
         # Input is the log returns
-        window     = 5 # days in window
+        window     = 10 # days in window
         #log_returns = np.append( [0.0], np.diff(np.log(series)))
         #log_returns[np.where(log_returns == np.nan)]  = 0.0 # scrub nans from log return calc
         #log_returns[np.where(log_returns == np.inf)]  = 0.0 # scrub inf from log return calc(volume blowout?)
         #log_returns[np.where(log_returns == -np.inf)] = 0.0 # scrub -inf from log return calc(volume blowout?)
         #try:
-        samples     = [series[i-window:i] for i in np.arange(window, len(series))]
+        #samples     = [series[i-window:i] for i in np.arange(window, len(series))]
         #except:
         #    print close_prices, open_prices, high_prices, low_prices, volume
         #    exit()
 
         # Training Labels, leave out first day to shift ahead by 1 from training input
         #labels        = series_raw[i_series][window+1:] #Shift ahead by 1 for next day regression
-        labels        = series[window+1:] #Shift ahead by 1 for next day regression
+        #labels        = series[window+1:] #Shift ahead by 1 for next day regression
 
-        samples = StandardScaler().fit_transform(samples)
+        samples = []
+        labels  = []
+        for i in np.arange(window+1, len(series)):
+            # past n percent difference
+            samples.append( np.divide(np.diff(series[i-window-1:i]), series[i-window-1:i-1]) )
+            # percent diff on current day
+            labels.append( [(series[i]-series[i-1])/series[i-1]] )
+
+        samples = np.array(samples) 
+        labels  = np.array(labels) 
+
 
         # Split the data into test/train
-        X_train, X_test, y_train, y_test = train_test_split(samples[:-10], labels[:-9], train_size=0.8, random_state=622)
+        X_train, X_test, y_train, y_test = train_test_split(samples[:-10], labels[:-10], train_size=0.8, random_state=622)
         X_validate = samples[-10:-1]# These are the 10-1 recent samples we use to showcase the model
-        y_validate = labels[-9:]
-        X_forecast = [samples[-1]] # This is the final value of our series, we will forecast the next day using this
+        y_validate = labels[-10:-1]#labels[-9:]
+        X_forecast = np.array([np.divide(np.diff(series[-window-1:]), series[-window-1:-1])])#[samples[-1]] # This is the final value of our series, we will forecast the next day using this
 
         # Standardize the data. We desire Zero Mean Unit Variance to prevent scaling issues in hyperplane.
         # http://scikit-learn.org/stable/modules/svm.html#svm-regression
-        """series_scaler = StandardScaler().fit(X_train)
-        X_train        = series_scaler.transform(X_train)
-        X_test         = series_scaler.transform(X_test)
-        X_validate     = series_scaler.transform(X_validate)
-        X_forecast     = series_scaler.transform(X_forecast)"""
+        series_scaler   = StandardScaler()
+        X_train         = series_scaler.fit_transform(X_train)
+        X_test          = series_scaler.transform(X_test)
+        X_validate      = series_scaler.transform(X_validate)
+        X_forecast      = series_scaler.transform(X_forecast)
+
+        solution_scaler = StandardScaler()
+        y_train         = solution_scaler.fit_transform(y_train)
+        y_test          = solution_scaler.transform(y_test)
+        y_validate      = solution_scaler.transform(y_validate)
 
         # Perform a random search to optimize hyperparameters
         # (we cant afford an exhaustive grid search so random helps us reduce steps)
@@ -286,7 +302,7 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
                       "cache_size": [100000.],
                       #"max_iter": [True, False],
                       }
-        model_template = SVR(max_iter=5e5)
+        model_template = SVR(max_iter=1e6)
         """param_dist = {"n_estimators": np.linspace(1,25,20,dtype=int),
                       "criterion": ['mse','mae'],
                       "max_features": ['auto','sqrt','log2'],
@@ -304,7 +320,7 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
         model_template = RandomForestRegressor(n_jobs=1)""" # causes mem exp?
 
         # run randomized search
-        n_iter_search = 25
+        n_iter_search = 100
         random_search = RandomizedSearchCV(model_template, 
                                            param_distributions=param_dist,
                                            n_iter=n_iter_search,
@@ -317,14 +333,20 @@ def forecast_asset(close_prices, open_prices, high_prices, low_prices, volume):
         # Utilize the best model to perform forecasts(test and validation)
         model = random_search#.best_estimator_
         model.fit(X_train, y_train)
-        test_inference     = model.predict(X_test)
-        validate_inference = model.predict(X_validate)
-        forecast_inference = model.predict(X_forecast)
+        test_inference     = solution_scaler.inverse_transform(model.predict(X_test)) 
+        validate_inference = solution_scaler.inverse_transform(model.predict(X_validate)) 
+        forecast_inference = solution_scaler.inverse_transform(model.predict(X_forecast))
 
-        series_to_return.append(np.append(validate_inference, forecast_inference))
+        
 
         # Analysis
         print "Score Test: %0.2f\tScore Validate: %0.2f"%(model.score(X_test, y_test), model.score(X_validate, y_validate)) 
+
+        series_to_return.append(np.append(
+                                        np.multiply(validate_inference,series[-10:-1])+series[-10:-1], 
+                                        np.multiply(forecast_inference,series[-1])+series[-1]
+                                        )
+                                )
         """print model.score(X_test, y_test)
         print model.score(X_validate, y_validate)
         print validate_inference
