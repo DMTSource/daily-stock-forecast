@@ -10,7 +10,7 @@ close, high, low, and volume of the next business day for each
 stock in our expanding universe.
 
 Daily Stock Forecast can be viewed today!<br />
-<http://1.daily-stock-forecast.appspot.com/>
+<http://daily-stock-forecast.com/>
 
 Screenshots of Daily Stock Forecast live and in action:<br />
 ![](https://github.com/DMTSource/daily-stock-forecast/blob/master/daily-stock-forecast.png)
