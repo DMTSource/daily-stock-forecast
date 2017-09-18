@@ -38,11 +38,9 @@ File Structure
 Key files in the application hierarchy.
 * daily-stock-forecast-gae
   * dailystockquant.py (App Engine homepage script)
-    * indexOld.html (Current website homepage, loaded into above script w/ Jinja2 templating)
-    * index.html (In development Polymer version of site)
-  * forecast.py (Cron job to launch a compute engine instance to perform the forecast automatically each business day) 
-* daily-stock-forecast-gce3
-  * DailyForecast.py (Download historical data, runs the forecast, publishes to datastore)
+    * index.html (Polymer version of site)
+
+* DailyForecast.py (Download historical data, runs the forecast, publishes to datastore)
 
 Installation
 ============
