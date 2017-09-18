@@ -64,6 +64,7 @@ Dependencies
 * sk-learn
 * googledatastore
 * Polymer (0.5.2+)
+* tweepy (used to post results to twitter automatically)
 
 Usage
 ------------
