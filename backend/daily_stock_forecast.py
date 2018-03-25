@@ -14,7 +14,7 @@ import pandas as pd
 from pandas.tseries.offsets import BDay
 
 from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import train_test_split
+#from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from scipy.stats import randint as sp_randint
 from scipy.stats import expon
@@ -78,10 +78,11 @@ def model(clf_name, features, labels):
     #    param_dist['randomforestclassifier__max_features'] = sp_randint(2, features.shape[1])
 
     # run randomized search
-    n_iter_search = 2
+    n_iter_search = 50
     random_search = RandomizedSearchCV(clf, param_distributions=param_dist,
                                        n_iter=n_iter_search,
-                                       scoring="f1_weighted")
+                                       scoring="f1_weighted",
+                                       n_jobs=-1)
 
     #start = time.time()
     random_search.fit(features, labels)
@@ -126,15 +127,20 @@ def model_scan(data, window):
     features = np.array(features)
     labels   = np.array(labels)
     
-    X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.1, random_state=42)
+    # this creates heavy overlap between test and train as we use a sliding window. Not ideal...
+    #X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.1, random_state=42)
+    # split the features into train/test, we will optimize, eval on test then refit to all data before inference
+    split   = int(len(features)*0.8)
+    X_train = features[:split]
+    X_test  = features[split:]
+    y_train = labels[:split]
+    y_test  = labels[split:]
 
     # Get a tuned version of each model
     models = map(model, classifier_names, [X_train[:]]*len(classifier_names), [y_train[:]]*len(classifier_names))
 
     target_names = ['short', 'long']
     y_preds = [m.best_estimator_.predict(X_test) for m in models]
-
-    forecasts = [m.best_estimator_.predict(inference_features)[0] for m in models]
 
     clf_reports     = [precision_recall_fscore_support(y_test, item) for item in y_preds]
     clf_reports_tot = [precision_recall_fscore_support(y_test, item, average='weighted') for item in y_preds]
@@ -161,10 +167,11 @@ def model_scan(data, window):
         "support_avg": clf_support_tot[i]
     } for i in np.arange(len(models))]
 
+    # refit all data now that we have used our held out data, but we need that new info for inference
+    forecasts = [m.best_estimator_.fit(features, labels).predict(inference_features)[0] for m in models[:]]
+
     #print classifier_names[best_idx], window
     #report(models[best_idx].cv_results_)
-
-    # get classification report for best model using held out data
 
     return [models, classifier_names, report_dicts, print_reports, forecasts]
 
@@ -175,11 +182,11 @@ def asset_to_report(symbol, company_name):
     #print hist.head()
 
     # Begin the model opt process, we work on exterior hyper params(ex: window len) here and let sklearn scan the model itself
-    #possible_windows = np.arange(1,max_window+1)[::9]
-    #possible_windows = np.linspace(1,max_window,21, dtype=int)
+    possible_windows = np.linspace(1,max_window,21, dtype=int)
     # array([  1,   5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,
     #     65,  70,  75,  80,  85,  90,  95, 100])
-    possible_windows = [5,max_window]
+    #possible_windows = [5,max_window] #testing
+    
     print possible_windows
 
     print 'Scanning %s for best window + hyperparams...'%symbol
@@ -205,7 +212,7 @@ def asset_to_report(symbol, company_name):
 
     # create a json report for the site
     report_dict = {}
-    report_dict['symbol']          = symbol
+    report_dict['symbol']          = symbol.replace('^','')
     report_dict['name']            = company_name
     report_dict['inference_day']   = inference_day
     if forecasts[best_idx] == 1.0:
@@ -234,28 +241,29 @@ def asset_to_report(symbol, company_name):
 if __name__ == "__main__":
 
     
-    #symbols,company_names = ['AAPL'], ['Apple Inc.']
-    # 5 indicies
-    company_names,symbols = [
+    #symbols,company_names = ['AAPL'], ['Apple Inc.'] #test
+    # 5 indicies to add to downloaded items
+    company_names = [
         'S&P 500',
         'Dow Jones Industrial Average',
         'Nasdaq Composite',
         'CBOE Interest Rate 10 Year T No',
         'CBOE Volatility Index'
-        ], [
+    ]
+    symbols = [
         '^GSPC',
         '^DJI',
         '^IXIC',
         '^TNX',
         '^VIX'
-        ]
+    ]
 
-    # Get 10 top stocks
+    # Get 10 top stocks by mktcap
     t_symbols, t_company_names = download_north_america_symbols(n=10)
-    symbols = symbols + list(t_symbols)
-    company_names = symbols + list(t_company_names)
+    symbols                    = symbols + list(t_symbols)
+    company_names              = company_names + list(t_company_names)
 
-    print symbols
+    print symbols,company_names
     
     # Get report for each symbol, heavy work per asset
     results = map(asset_to_report, symbols, company_names)

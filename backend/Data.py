@@ -10,7 +10,7 @@ from pandas.tseries.offsets import BDay
 ## sudo pip install --upgrade pandas-datareader==0.5.0
 import pandas_datareader.data as web
 
-def download_north_america_symbols(n=25):
+def download_north_america_symbols(n=10):
     start_time = time.time()
     # Download from the 3 exchanges we have access to
     nasdaq = pd.read_csv("http://www.nasdaq.com/screening/companies-by-region.aspx?exchange=NASDAQ&render=download")
@@ -34,10 +34,10 @@ def download_north_america_symbols(n=25):
     return symbol_list, company_name_list
 
 def download_historical(symbol):
-    print('\nDownloading\t\"%s\"'%symbol.strip())
+    print('\nDownloading\t\"%s\"'%symbol)
 
     # setup timespan per asset
-    hist_len = 252*5
+    hist_len = 252*10
     end   = datetime.datetime.now(tz=timezone('US/Eastern')) + BDay(0) # Last full business day
     start = end - BDay(hist_len)#+hist_len*0.1) 
 
