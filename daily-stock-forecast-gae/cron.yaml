@@ -1,5 +1,0 @@
-cron:
-- description: daily stock forecast on GCE
-  url: /forecast
-  schedule: every mon,tue,wed,thu,fri 17:00
-  timezone: US/Eastern

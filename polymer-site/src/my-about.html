@@ -1,0 +1,178 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="my-footer.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-about">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        background-color: #efefef;
+      }
+      .top-container{
+        /*background-image: url("../images/background.png");*/
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #ffffff;
+        text-align: left;
+      }
+      .top-card {
+        max-width: 1100px;
+        margin: 70px auto 70px auto;
+        padding: 15px;
+      }
+
+      .second-container{
+        padding-top: 0px;
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #1976D2;
+        color: #efefef;
+        border-top: 0.5px solid #21212111;
+      }
+      .second-card{
+        max-width: 1100px;
+        margin: 60px auto 60px auto;
+        padding: 15px;
+        
+      }
+      .how-work-title{
+        font-size: 16px; 
+        margin-bottom: 5px;
+      }
+      .how-work-desc{
+        font-size: 13px; 
+        padding: 5px;
+        line-height: 1.7;
+      }
+
+      .third-container{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #fdfdfd;
+        border-top: 0.5px solid #21212111;
+        border-bottom: 0.5px solid #21212111;
+      }
+      .third-card{
+        max-width: 1100px;
+        margin: 30px auto 30px auto;
+        padding: 15px;
+      }
+
+      .fourth-container{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: var(--app-primary-color);
+        
+      }
+      .fourth-card{
+        max-width: 1100px;
+        margin: 50px auto 50px auto;
+        padding: 15px;
+      }
+
+    </style>
+
+    <div class="top-container">
+      <div class="top-card">
+        <div class="layout horz-to-vert">
+          <div class="layout flex" style="text-align: left; padding: 20px;">
+            <img style="width:85%; margin-top: 33px;" src="images/laptop.png" />
+          </div>
+          <div class="layout flex" style="padding: 20px;">
+            <div style="font-size: 50px; margin-top: 0px; font-weight: 900;">Open to Close</div>
+            <div style="font-size: 50px; margin-top: -25px; font-weight: 900;">Price Classification</div>
+            <div style="font-size: 17px; margin-top: 10px;line-height: 2.0;">Daily Stock Forecasts optimizes and ranks machine learning models to predict the intraday movement of the stock market for the top 10 US Equities by Market Cap and a number of popular indicies.</div>
+            <div style="margin-top: 10px;" class="layout horizontal">
+              <a href="[[rootPath]]" style="text-decoration: none;"><paper-button style="height: 60px; width: 170px; margin-top: 15px; font-size: 15px;" raised>Today's Forecast</paper-button></a>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="second-container">
+      <div class="second-card layout horz-to-vert">
+        <div  class="layout flex" style="padding: 20px;">
+          <div style="font-size: 28px; line-height: 50px;">Features, Models, Hyperparameters</div>
+          <div style="font-size: 21px; margin-top: 20px;">Optimization occurs at every level</div>
+          <div style="font-size: 18px; margin-top: 22px; margin-right: auto; margin-left: auto;line-height: 1.5;">Every trading day, DSF builds a number of classification models using historical candle+volume data. Each model's hyperparameters are optimized as well as the length of the lookback period per sample. Classification reprots are generated using test data. The <a style="text-decoration: underline; color:#f1f1f1;" target="_blank" href="http://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html">f1 score</a> is used to rank models. </div>
+        </div>
+        <div class="layout flex" style="text-align: center padding 20px;">
+          <img style="width: 85%; padding-top: 0px; " src="images/daily-stock-forecast-preview.png" />
+        </div>
+      </div>
+    </div>
+
+    <div class="third-container">
+      <div class="third-card">
+        <div class="layout horz-to-vert"  style="padding: 20px;">
+          <div class="layout flex">
+            <div style="font-size: 30px;">Daily Stock Forecast is  open source</div>  
+            <div style="font-size: 10pt; margin-top: 5px;">The forecast generation script and this website are all availible on github</div>
+          </div>
+          <div>
+            <a href="https://github.com/DMTSource/daily-stock-forecast" style="text-decoration: none;"><paper-button style="height: 60px; width: 200px; margin-top: 0px; font-size: 15px;" raised>View the Source</paper-button></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fourth-container">
+      <div class="fourth-card">
+        <div style="font-size: 25px; padding: 20px;">The Team</div>
+
+
+        <div class="layout horizontal" style="padding-top: 30px;">
+
+          <div class="layout flex" style="text-align: center;">
+            
+          </div>
+
+          <div class="layout flex" style="text-align: center;">
+            <div><div class="circle derek"></div></div>
+            <div>
+              <div>Derek Tishler</div>
+              <div style="font-size: 10px; margin-top: 3px;">Founder, Quant, Entrepreneur, Physicist</div>
+              <div style="font-size: 12px; margin-top: 5px; width: 85%; margin-left:auto;margin-right:auto;">Derek develops algorithmic trading systems for financial markets, advises startups, and develops cloud based products.</div>
+            </div>
+          </div>
+
+          <div class="layout flex" style="text-align: center;">
+           
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <my-footer></my-footer>
+
+  </template>
+
+  <script>
+    class About extends Polymer.Element {
+      static get is() { return 'my-about'; }
+    }
+
+    window.customElements.define(About.is, About);
+  </script>
+</dom-module>

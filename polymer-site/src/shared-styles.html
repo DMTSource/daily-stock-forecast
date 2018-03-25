@@ -1,0 +1,141 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style include="iron-flex">
+      .card {
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 24px;
+        padding: 16px;
+        color: #757575;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .circle {
+        display: inline-block;
+        width: 8vh;
+        height: 8vh;
+        text-align: center;
+        color: #555;
+        border: 5px solid #efefef;
+        border-radius: 50%;
+        background: #ddd;
+        font-size: 30px;
+        line-height: 8vh;
+      }
+      .circle-delta {
+        display: inline-block;
+        width: 4vh;
+        height: 4vh;
+        text-align: center;
+        color: #555;
+        border: 5px solid #F44336;
+        border-radius: 50%;
+        
+        font-size: 20px;
+        line-height: 4vh;
+      }
+      .derek{
+        background-image: url("../images/derekmtishler.jpg");
+        background-size: 8vh 8vh;
+      }
+      paper-button{
+        background-color: #2196F3;
+        color:#fff;
+        text-transform: none;
+      }
+      paper-search-panel{
+        color: var(--app-secondary-color);
+      }
+      
+      paper-search-bar{
+        color: var(--app-secondary-color);
+        
+      }
+
+      hr{
+        border: 0.5px solid #21212111;
+      }
+
+      h1 {
+        margin: 16px 0;
+        color: #212121;
+        font-size: 22px;
+      }
+
+      .tryit-container{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #fdfdfd;
+        border-top: 0.5px solid #21212111;
+        border-bottom: 0.5px solid #21212111;
+        /*background-image: url("../images/circuit-bg.png");*/
+      }
+      .tryit-card{
+        max-width: 1100px;
+        margin: 30px auto 30px auto;
+        padding: 15px;
+      }
+
+      .footer-container{
+        border-top: 0.5px solid #21212111;
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        background-color: #fdfdfd;
+      }
+      .footer-card{
+        max-width: 1100px;
+        margin: 50px auto 10px auto;
+        padding: 15px;
+        color: #212121;
+      }
+      .footer-menu{
+        font-size: 14px;
+        line-height: 2.3;
+      }
+
+
+      .h-res-disabled {
+        display: block;
+      } 
+      .horz-to-vert{
+        @apply(--layout-horizontal);
+      }
+      @media only screen and (max-width: 1100px) {
+        .h-res-disabled {
+          display: none;
+        }
+          @media only screen and (max-width: 750px) {
+            .horz-to-vert{
+              @apply(--layout-vertical);
+            }
+            .footer-card{
+              margin-top: 0px;
+              text-align: center;
+            }
+          }
+
+      }
+
+
+    </style>
+  </template>
+</dom-module>

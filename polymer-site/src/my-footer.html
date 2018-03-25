@@ -1,0 +1,108 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer-element.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-footer">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        background-color: #fdfdfd;
+      }
+
+      a{
+        color: #212121;
+        text-decoration: none;
+      }
+
+      .footer-logo-icon{
+        color: #2196F3; width: 35px; height: 35px; padding-left: 20px;padding-top: 45px;
+      }
+      .footer-logo-txt{
+        font-size: 15px; padding-top: 52px; padding-left: 5px; font-weight: 700;
+      }
+      .center-hr-mini{
+        width:80%; margin-right: 100%;
+      }
+      @media only screen and (max-width: 750px) {
+        .center-hr-mini{
+          width: 60%;
+          margin-right: auto;
+          margin-left: auto;
+        }
+        .footer-menu-title{
+          margin-top: 30px;
+        }
+        .footer-logo-icon{
+          padding-top: 25px;
+          margin-left: auto;
+          margin-right: 0;
+        }
+        .footer-logo-txt{
+         padding-top: 31px; 
+         margin-right: auto;
+        }
+      }
+
+    </style>
+
+    
+
+    <div class="footer-container">
+      <div class="footer-card">
+        <div class="layout horz-to-vert" style="width:100%;">
+          <div class="layout flex">
+            <div class="layout horizontal">
+              <iron-icon icon="device:graphic-eq" class="footer-logo-icon"></iron-icon>
+              <div class="footer-logo-txt">Daily Stock Forecast</div>
+            </div>
+          </div>
+          <div class="layout flex">
+            <div class="footer-menu-title" style="font-size: 13px;">Daily Stock Forecast</div>
+            <hr  class="center-hr-mini"/>
+            <div class="footer-menu"><a href="[[rootPath]]">Home</a></div>
+            <div class="footer-menu"><a href="[[rootPath]]about">About</a></div>
+          </div>
+          <div class="layout flex">
+            <div class="footer-menu-title" style="font-size: 13px;">Built Using</div>
+            <hr class="center-hr-mini"/>
+            <div class="footer-menu"><a href="https://cloud.google.com/">Google Cloud Platform</a></div>
+            <div class="footer-menu"><a href="https://www.polymer-project.org/">Polymer</a></div>
+            <div class="footer-menu"><a href="http://scikit-learn.org/stable/">scikit-learn</a></div>
+          </div>
+          <div class="layout flex">
+            <div class="footer-menu-title" style="font-size: 13px;">Disclaimer</div>
+            <hr   class="center-hr-mini"/>
+            <div style="font-size: 12px; padding: 5px; max-width: 400px; margin-left: auto; margin-right: auto;">This site and the provided content is to be used for informational and entertainment purposes only and does not constitute investment advice for any individual or entity.</div>
+          </div>
+        </div>
+        <div style="width: 100%; margin-top: 30px;">
+          <hr />
+          <div class="layout horizontal">
+            <div class="layuout flex" style="font-size: 10px; margin-top: 0px; text-align: left;">&#x24B8; 2018 Tishler Capital</div>
+            <div style="font-size: 10px;"><a href="[[rootPath]]terms">Privacy &amp; Terms</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </template>
+
+  <script>
+    class Footer extends Polymer.Element {
+      static get is() { return 'my-footer'; }
+    }
+
+    window.customElements.define(Footer.is, Footer);
+  </script>
+</dom-module>

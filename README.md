@@ -1,15 +1,8 @@
 Daily Stock Forecast
 =======
 
-Daily Stock Forecast is a cloud based machine learning tool 
-for day trading professionals. The site pulls from a current
-list of ~7,000 stocks across the AMEX, Nasdaq, and NYSE
-exchanges and performs epsilon-Support Vector Regression based
-machine learning on historical values to forecast the open,
-close, high, low, and volume of the next business day for each
-stock in our expanding universe.
+Daily Stock Forecasts optimizes and ranks machine learning models to predict the intraday movement of the stock market for the top 10 US Equities by Market Cap and a number of popular indicies.
 
-Daily Stock Forecast can be viewed today!<br />
 <http://daily-stock-forecast.com/>
 
 Screenshots of Daily Stock Forecast live and in action:<br />
@@ -18,29 +11,16 @@ Screenshots of Daily Stock Forecast live and in action:<br />
 Features
 ========
 
-* Transparency of results. Each forecast comes with a 10 day performance
-analysis to expose the Slope and R2 values of past predictions for each
-metric. Additonaly, you can mouse over each histogram bar to see that 
-metrics correlation scatter plot.
-
-* Frontend powered by Google App Engine and Google NDB Datastore,
-Google Charts, and in development is a new Polymer based site.
-
-* Backend powered by Google Compute engine and scikit-learn to
-perform machine learning on historical stock prices.
-
-* Statistic and machine learning libraries like matplotlib, scipy,
-pandas, and scikit-learn support development, analysis and
-in development visualization of stock forecasts.
+Every trading day, DSF builds a number of classification models using historical candle+volume data. Each model's hyperparameters are optimized as well as the length of the lookback period per sample. Classification reprots are generated using test data. The f1 score is used to rank models.
 
 File Structure
 ============
 Key files in the application hierarchy.
-* daily-stock-forecast-gae
-  * dailystockquant.py (App Engine homepage script)
-    * index.html (Polymer version of site)
+* polymer-site
+  * a simple Polymer Starter Kit is used to build a responsive website.
 
-* DailyForecast.py (Download historical data, runs the forecast, publishes to datastore)
+* backend
+    * forecast generation script & helpers
 
 Installation
 ============
@@ -57,29 +37,23 @@ Engine instance with the ability to securely access the Datastore.
 Dependencies
 ------------
 
-* Python 2.7
+* Python 2.7+
 * numpy 
 * pandas
 * pytz
-* sk-learn
+* scikit-learn
 * googledatastore
-* Polymer (0.5.2+)
-* tweepy (used to post results to twitter automatically)
+* Polymer 2
 
 Usage
 ------------
-To run the forecast you must configure gcloud to the correct project and then you can run:,<br />
-python DailyForecast.py # use 1 cpu,<br />
-python -m scoop DailyForecast.py # Use all cpu,<br />
-python -m scoop -n 16 DailyForecast.py # Use only 16 cpu,<br />
 
-Credits
+python daily-stock-forecast.py
+
+
+Credits/Contact
 ============
 
 Daily Stock Forecast was developed by Derek M Tishler,<br />
-<https://www.linkedin.com/profile/view?id=263507105>
+<https://www.linkedin.com/in/derekmtishler/>
 
-Contact
-=======
-
-For other questions, please contact <dmtishler@gmail.com>.

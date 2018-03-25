@@ -1,9 +1,0 @@
-indexes:
-- kind: StockList
-  properties:
-  - name: symbol
-  - name: rank
-- kind: Forecast
-  properties:
-  - name: symbol
-  - name: rank

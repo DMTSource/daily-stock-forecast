@@ -1,0 +1,15 @@
+
+# Run the forecast to generate the forecasts.json file
+cd daily-stock-forecast-v2/backend
+python daily_stock_forecast.py
+
+# The polymer site needs to be built
+cd /daily-stock-forecast-v2/polymer-site/
+polymer build --js-minify --css-minify --html-minify 
+
+# cleanup static folder in site_app_engine
+# copy Build/default files to static folder
+
+# The app engine site needs to be 
+cd ../site_app_engine
+gcloud app deploy app.yaml --project-name

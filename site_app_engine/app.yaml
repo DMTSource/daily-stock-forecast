@@ -1,0 +1,36 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /bower_components
+  static_dir: static/bower_components
+  secure: always
+
+- url: /images
+  static_dir: static/images
+  secure: always
+
+- url: /src
+  static_dir: static/src
+  secure: always
+
+- url: /service-worker.js
+  static_files: service-worker.js
+  upload: service-worker.js
+  secure: always
+
+
+
+- url: /.*
+#  script: main.app
+  static_files: static/index.html
+  upload: static/index.html
+  secure: always
+
+  
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest

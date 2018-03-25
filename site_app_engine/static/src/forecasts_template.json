@@ -1,0 +1,93 @@
+{
+	"date":"March 25 2018",
+	"items":[
+		{
+			"symbol": "SPY", 
+			"name": "SPDR S&P 500 ETF Trust", 
+			"inference": "upward", 
+			"inference_color": " #4CAF50",
+			"hist_prices":[
+				["Date", "Open", { "role": "style"}], 
+				["Apr 19", 1010, "color: #2196F3"],
+				["Apr 20", 1011, "color: #2196F3"],
+				["Apr 21", 1102, "color: #2196F3"],
+				["Apr 22", 1010, "color: #2196F3"],
+				["Apr 23", 1015, "color: #2196F3"]
+			],
+			"model_f1s":[
+				["Model", "f1", { "role": "style"}], 
+				["Nearest Neighbors", 0.62, "color: #2196F3"],
+				["Linear SVM", 0.58, "color: #2196F3"],
+				["RBF SVM", 0.55, "color: #2196F3"],
+				["Gaussian process", 0.53, "color: #2196F3"],
+				["Decision Tree", 0.52, "color: #2196F3"],
+				["Random Forest", 0.51, "color: #2196F3"],
+				["Neural Net", 0.50, "color: #2196F3"],
+				["AdaBoost", 0.49, "color: #2196F3"],
+				["Naive Bayes", 0.48, "color: #2196F3"],
+				["QDA", 0.47, "color: #2196F3"]
+			],
+			"top_model":
+				{
+					"name":"Nearest Neighbors",
+		            "opt_period":10,
+		            "precision_sell":0.0,
+		            "precision_buy":0.0,
+		            "precision_avg":0.0,
+		            "recall_sell":0.0,
+		            "recall_buy":0.0,
+		            "recall_avg":0.0,
+		            "f1_sell":0.0,
+		            "f1_buy":0.0,
+		            "f1_avg":0.0,
+		            "support_sell":0.0,
+		            "support_buy":0.0,
+		            "support_avg":0.0
+				}
+		},
+		{
+			"symbol": "AAPL", 
+			"name": "Apple Inc.", 
+			"inference": "downward", 
+			"inference_color": " #F44336",
+			"hist_prices":[
+				["Date", "Open", { "role": "style"}], 
+				["Apr 19", 1010, "color: #2196F3"],
+				["Apr 20", 1011, "color: #2196F3"],
+				["Apr 21", 1102, "color: #2196F3"],
+				["Apr 22", 1010, "color: #2196F3"],
+				["Apr 23", 1015, "color: #2196F3"]
+			],
+			"model_f1s":[
+				["Model", "f1", { "role": "style"}], 
+				["Nearest Neighbors", 0.62, "color: #2196F3"],
+				["Linear SVM", 0.58, "color: #2196F3"],
+				["RBF SVM", 0.55, "color: #2196F3"],
+				["Gaussian process", 0.53, "color: #2196F3"],
+				["Decision Tree", 0.52, "color: #2196F3"],
+				["Random Forest", 0.51, "color: #2196F3"],
+				["Neural Net", 0.50, "color: #2196F3"],
+				["AdaBoost", 0.49, "color: #2196F3"],
+				["Naive Bayes", 0.48, "color: #2196F3"],
+				["QDA", 0.47, "color: #2196F3"]
+			],
+			"top_model":
+				{
+					"name":"Nearest Neighbors",
+		            "opt_period":10,
+		            "precision_sell":0.0,
+		            "precision_buy":0.0,
+		            "precision_avg":0.0,
+		            "recall_sell":0.0,
+		            "recall_buy":0.0,
+		            "recall_avg":0.0,
+		            "f1_sell":0.0,
+		            "f1_buy":0.0,
+		            "f1_avg":0.0,
+		            "support_sell":0.0,
+		            "support_buy":0.0,
+		            "support_avg":0.0
+				}
+		}
+
+]}

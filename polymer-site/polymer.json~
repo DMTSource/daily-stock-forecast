@@ -1,0 +1,37 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/my-app.html",
+  "fragments": [
+    "src/my-home.html",
+    "src/my-about.html",
+    "src/my-view404.html"
+  ],
+  "sources": [
+    "images/**/*",
+    "src/**/*"
+  ],
+  "extraDependencies": [
+    "bower_components/webcomponentsjs/*.js",
+    "!bower_components/webcomponentsjs/gulpfile.js",
+    "manifest.json"
+  ],
+  "lint": {
+    "rules": ["polymer-2"]
+  },
+  "builds": [
+    {
+      "js": {"minify": true},
+      "css": {"minify": true},
+      "html": {"minify": true}
+    },
+    {
+      "preset": "es5-bundled"
+    },
+    {
+      "preset": "es6-bundled"
+    },
+    {
+      "preset": "es6-unbundled"
+    }
+  ]
+}
