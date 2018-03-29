@@ -1,4 +1,10 @@
 
+#pandas-datareader==0.5.0
+#scikit-learn==0.18.1
+#scipy==0.19.0
+
+
+
 from itertools import chain
 import numpy as np
 from decimal import Decimal
@@ -12,6 +18,11 @@ from pytz import timezone
 import pandas as pd
 #import pandas_datareader as par
 from pandas.tseries.offsets import BDay
+
+def warn(*args, **kwargs):
+    pass
+import warnings
+warnings.warn = warn
 
 from sklearn.model_selection import RandomizedSearchCV
 #from sklearn.model_selection import train_test_split
@@ -29,6 +40,8 @@ from sklearn.model_selection import GridSearchCV
 
 from sklearn.pipeline import Pipeline
 
+from sklearn.base import clone
+
 
 # https://stackoverflow.com/questions/1447287/format-floats-with-standard-json-module
 import json
@@ -40,7 +53,10 @@ from Classifiers import *
 # downloader for symbols and historical data
 from Data import download_north_america_symbols, download_historical
 
-max_window = 100 #100
+#from scoop import futures
+#from multiprocessing import Pool
+
+max_window = 50 #100
 
 # do at start in case it works past midnight
 inference_dt = datetime.datetime.now(tz=timezone('US/Eastern')) + BDay(1)
@@ -81,8 +97,8 @@ def model(clf_name, features, labels):
     n_iter_search = 50
     random_search = RandomizedSearchCV(clf, param_distributions=param_dist,
                                        n_iter=n_iter_search,
-                                       scoring="f1_weighted",
-                                       n_jobs=-1)
+                                       scoring="f1_weighted")#,
+                                       #n_jobs = 8)#,pre_dispatch=8)
 
     #start = time.time()
     random_search.fit(features, labels)
@@ -91,11 +107,12 @@ def model(clf_name, features, labels):
     #report(random_search.cv_results_)
 
     elapsed_time = time.time() - start_time
-    #print 'Optimizing %s on window %d took %d sec'%(clf_name, features.shape[1]/6, elapsed_time)
+    print 'Optimizing %s on window %d took %d sec'%(clf_name, features.shape[1]/6, elapsed_time)
 
     return random_search
 
-def model_scan(data, window):
+def model_scan(INPUT):
+    data, window = INPUT
 
     # assemble the features and labels for current window
     features = []
@@ -152,7 +169,7 @@ def model_scan(data, window):
 
     report_dicts = [{
         "name": classifier_names[i],
-        "opt_period": window,
+        "opt_period": int(window),
         "precision_sell": clf_reports[i][0][0],
         "precision_buy": clf_reports[i][0][1],
         "precision_avg": clf_reports_tot[i][0],
@@ -162,35 +179,50 @@ def model_scan(data, window):
         "f1_sell": clf_reports[i][2][0],
         "f1_buy": clf_reports[i][2][1],
         "f1_avg": clf_reports_tot[i][2],
-        "support_sell": clf_reports[i][3][0],
-        "support_buy": clf_reports[i][3][1],
-        "support_avg": clf_support_tot[i]
+        "support_sell": int(clf_reports[i][3][0]),
+        "support_buy": int(clf_reports[i][3][1]),
+        "support_avg": int(clf_support_tot[i])
     } for i in np.arange(len(models))]
 
     # refit all data now that we have used our held out data, but we need that new info for inference
-    forecasts = [m.best_estimator_.fit(features, labels).predict(inference_features)[0] for m in models[:]]
+    #print 'Refit and Forecast...'
+    #forecasts = [m.best_estimator_.fit(features, labels).predict(inference_features)[0] for m in models[:]]
+    start_time = time.time()
+    forecasts = []
+    for m in models[:]:
+        temp_model = clone(m.best_estimator_)
+        temp_model.fit(features, labels)
+        forecasts.append(temp_model.predict(inference_features)[0])
+    elapsed_time = time.time() - start_time
+    print 'Refit and Forecast took %d s'%elapsed_time
 
     #print classifier_names[best_idx], window
     #report(models[best_idx].cv_results_)
 
     return [models, classifier_names, report_dicts, print_reports, forecasts]
 
-def asset_to_report(symbol, company_name):
+def asset_to_report(INPUT):
+    symbol, company_name = INPUT
+
+    start_time = time.time()
     
     # Download availible data
     hist = download_historical(symbol)
     #print hist.head()
 
     # Begin the model opt process, we work on exterior hyper params(ex: window len) here and let sklearn scan the model itself
-    possible_windows = np.linspace(1,max_window,21, dtype=int)
+    #possible_windows = np.linspace(1,max_window,21, dtype=int)
     # array([  1,   5,  10,  15,  20,  25,  30,  35,  40,  45,  50,  55,  60,
     #     65,  70,  75,  80,  85,  90,  95, 100])
+    possible_windows = np.linspace(1,max_window, 11, dtype=int)
+    # array([  1,  10,  20,  30,  40,  50,  60,  70,  80,  90, 100])
+
     #possible_windows = [5,max_window] #testing
     
     print possible_windows
 
     print 'Scanning %s for best window + hyperparams...'%symbol
-    results = map(model_scan, [hist]*len(possible_windows), possible_windows)
+    results = list(map(model_scan, zip([hist]*len(possible_windows), possible_windows)))
     
     models        = list(chain.from_iterable([item[0] for item in results]))
     names         = list(chain.from_iterable([item[1] for item in results]))
@@ -203,16 +235,18 @@ def asset_to_report(symbol, company_name):
     windows       = [item['opt_period'] for item in reports]
     
     sorted_idx = np.argsort(scores)[::-1]
-
     best_idx = np.argmax(scores)
-    print names[best_idx], windows[best_idx]
+
+    elapsed_time = time.time() - start_time
+
+    print "Best Model: %s  window: %d  took: %0.1f minutes"%(names[best_idx], windows[best_idx], elapsed_time/60.)
     report(models[best_idx].cv_results_)
     print print_reports[best_idx]
     print '\n'
 
     # create a json report for the site
     report_dict = {}
-    report_dict['symbol']          = symbol.replace('^','')
+    report_dict['symbol']          = symbol#.replace('^','')
     report_dict['name']            = company_name
     report_dict['inference_day']   = inference_day
     if forecasts[best_idx] == 1.0:
@@ -239,11 +273,11 @@ def asset_to_report(symbol, company_name):
     return report_dict
 
 if __name__ == "__main__":
-
     
     #symbols,company_names = ['AAPL'], ['Apple Inc.'] #test
     # 5 indicies to add to downloaded items
     company_names = [
+        #'ProShares Short S&P500',
         'S&P 500',
         'Dow Jones Industrial Average',
         'Nasdaq Composite',
@@ -251,6 +285,7 @@ if __name__ == "__main__":
         'CBOE Volatility Index'
     ]
     symbols = [
+        #'SH',
         '^GSPC',
         '^DJI',
         '^IXIC',
@@ -259,14 +294,14 @@ if __name__ == "__main__":
     ]
 
     # Get 10 top stocks by mktcap
-    t_symbols, t_company_names = download_north_america_symbols(n=10)
+    t_symbols, t_company_names = download_north_america_symbols(n=5)
     symbols                    = symbols + list(t_symbols)
     company_names              = company_names + list(t_company_names)
 
     print symbols,company_names
     
     # Get report for each symbol, heavy work per asset
-    results = map(asset_to_report, symbols, company_names)
+    results = list(map(asset_to_report, zip(symbols, company_names)))
 
     scores = [item['top_model']['f1_avg'] for item in results]
     sorted_idx = np.argsort(scores)[::-1]
@@ -275,9 +310,10 @@ if __name__ == "__main__":
     save_dict['date']  = inference_dt.strftime("%a, %b %d %Y")
     save_dict['items'] = [results[item] for item in sorted_idx]
 
+    #print str(save_dict)
+
     # note we are throwing the forecasts file into the polymer site folder
     with open('../polymer-site/src/forecasts.json', 'w') as fp:
-        json.dump(save_dict, fp)
+        json.dump(save_dict, fp, indent=4)
 
-
-    print str(save_dict)
+    print json.dumps(save_dict, indent=4)

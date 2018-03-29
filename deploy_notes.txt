@@ -12,4 +12,4 @@ polymer build --js-minify --css-minify --html-minify
 
 # The app engine site needs to be 
 cd ../site_app_engine
-gcloud app deploy app.yaml --project-name
+gcloud app deploy app.yaml --project <name>

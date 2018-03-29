@@ -1,1 +1,1065 @@
-{"date": "Mon, Mar 26 2018", "items": [{"inference": "upward", "name": "Apple Inc.", "hist_prices": [["Date", "Open", {"role": "style"}], ["Mon", 175.30, "color: #2196F3"], ["Tue", 175.24, "color: #2196F3"], ["Wed", 171.27, "color: #2196F3"], ["Thu", 168.85, "color: #2196F3"], ["Fri", 164.94, "color: #2196F3"]], "top_model": {"f1_buy": 0.58, "f1_sell": 0.57, "support_avg": 223, "precision_avg": 0.57, "recall_sell": 0.55, "support_buy": 110, "precision_buy": 0.56, "support_sell": 113, "name": "Linear SVM", "recall_buy": 0.60, "opt_period": 100, "recall_avg": 0.57, "precision_sell": 0.58, "f1_avg": 0.57}, "model_f1s": [["Model", "f1", {"role": "style"}], ["Linear SVM (100)", 0.57, "color: #2196F3"], ["Nearest Neighbors (100)", 0.55, "color: #2196F3"], ["Decision Tree (100)", 0.53, "color: #2196F3"], ["Gaussian Process (5)", 0.52, "color: #2196F3"], ["QDA (5)", 0.52, "color: #2196F3"], ["AdaBoost (100)", 0.52, "color: #2196F3"], ["Nearest Neighbors (5)", 0.51, "color: #2196F3"], ["Gaussian Process (100)", 0.50, "color: #2196F3"]], "inference_color": "#4CAF50", "inference_day": "Mon", "symbol": "AAPL"}, {"inference": "upward", "name": "CBOE Volatility Index", "hist_prices": [["Date", "Open", {"role": "style"}], ["Mon", 19.02, "color: #2196F3"], ["Tue", 18.20, "color: #2196F3"], ["Wed", 17.86, "color: #2196F3"], ["Thu", 23.34, "color: #2196F3"], ["Fri", 24.87, "color: #2196F3"]], "top_model": {"f1_buy": 0.53, "f1_sell": 0.61, "support_avg": 223, "precision_avg": 0.57, "recall_sell": 0.62, "support_buy": 102, "precision_buy": 0.54, "support_sell": 121, "name": "Linear SVM", "recall_buy": 0.52, "opt_period": 5, "recall_avg": 0.57, "precision_sell": 0.60, "f1_avg": 0.57}, "model_f1s": [["Model", "f1", {"role": "style"}], ["Linear SVM (5)", 0.57, "color: #2196F3"], ["Naive Bayes (100)", 0.56, "color: #2196F3"], ["Decision Tree (5)", 0.54, "color: #2196F3"], ["Linear SVM (100)", 0.53, "color: #2196F3"], ["Nearest Neighbors (5)", 0.53, "color: #2196F3"], ["Gaussian Process (5)", 0.51, "color: #2196F3"], ["RBF SVM (5)", 0.51, "color: #2196F3"], ["Nearest Neighbors (100)", 0.51, "color: #2196F3"]], "inference_color": "#4CAF50", "inference_day": "Mon", "symbol": "^VIX"}, {"inference": "downward", "name": "Amazon.com, Inc.", "hist_prices": [["Date", "Open", {"role": "style"}], ["Mon", 1544.93, "color: #2196F3"], ["Tue", 1586.51, "color: #2196F3"], ["Wed", 1581.86, "color: #2196F3"], ["Thu", 1544.92, "color: #2196F3"], ["Fri", 1495.56, "color: #2196F3"]], "top_model": {"f1_buy": 0.56, "f1_sell": 0.52, "support_avg": 223, "precision_avg": 0.55, "recall_sell": 0.47, "support_buy": 106, "precision_buy": 0.52, "support_sell": 117, "name": "Decision Tree", "recall_buy": 0.62, "opt_period": 5, "recall_avg": 0.54, "precision_sell": 0.58, "f1_avg": 0.54}, "model_f1s": [["Model", "f1", {"role": "style"}], ["Decision Tree (5)", 0.54, "color: #2196F3"], ["AdaBoost (5)", 0.54, "color: #2196F3"], ["Gaussian Process (5)", 0.53, "color: #2196F3"], ["RBF SVM (5)", 0.53, "color: #2196F3"], ["QDA (5)", 0.51, "color: #2196F3"], ["Random Forest (100)", 0.51, "color: #2196F3"], ["Nearest Neighbors (100)", 0.50, "color: #2196F3"], ["Linear SVM (5)", 0.49, "color: #2196F3"]], "inference_color": "#F44336", "inference_day": "Mon", "symbol": "AMZN"}, {"inference": "downward", "name": "CBOE Interest Rate 10 Year T No", "hist_prices": [["Date", "Open", {"role": "style"}], ["Mon", 2.85, "color: #2196F3"], ["Tue", 2.88, "color: #2196F3"], ["Wed", 2.91, "color: #2196F3"], ["Thu", 2.83, "color: #2196F3"], ["Fri", 2.83, "color: #2196F3"]], "top_model": {"f1_buy": 0.40, "f1_sell": 0.64, "support_avg": 223, "precision_avg": 0.55, "recall_sell": 0.76, "support_buy": 105, "precision_buy": 0.54, "support_sell": 118, "name": "Gaussian Process", "recall_buy": 0.31, "opt_period": 5, "recall_avg": 0.55, "precision_sell": 0.56, "f1_avg": 0.53}, "model_f1s": [["Model", "f1", {"role": "style"}], ["Gaussian Process (5)", 0.53, "color: #2196F3"], ["Random Forest (5)", 0.51, "color: #2196F3"], ["Decision Tree (100)", 0.50, "color: #2196F3"], ["Nearest Neighbors (100)", 0.49, "color: #2196F3"], ["Nearest Neighbors (5)", 0.49, "color: #2196F3"], ["AdaBoost (5)", 0.48, "color: #2196F3"], ["Gaussian Process (100)", 0.47, "color: #2196F3"], ["RBF SVM (5)", 0.47, "color: #2196F3"]], "inference_color": "#F44336", "inference_day": "Mon", "symbol": "^TNX"}]}
+{
+    "date": "Thu, Mar 29 2018", 
+    "items": [
+        {
+            "inference": "downward", 
+            "name": "S&P 500", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    2643.69, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    2588.26, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    2658.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    2612.62, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    2605.00, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.62, 
+                "f1_sell": 0.56, 
+                "support_avg": 234, 
+                "precision_avg": 0.60, 
+                "recall_sell": 0.58, 
+                "support_buy": 128, 
+                "precision_buy": 0.63, 
+                "support_sell": 106, 
+                "name": "Nearest Neighbors", 
+                "recall_buy": 0.61, 
+                "opt_period": 45, 
+                "recall_avg": 0.59, 
+                "precision_sell": 0.55, 
+                "f1_avg": 0.59
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Nearest Neighbors (45)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (40)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (35)", 
+                    0.58, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (50)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (35)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (5)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (35)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (50)", 
+                    0.55, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "^GSPC"
+        }, 
+        {
+            "inference": "downward", 
+            "name": "CBOE Volatility Index", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    23.34, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    24.87, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    21.03, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    22.50, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    22.87, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.52, 
+                "f1_sell": 0.66, 
+                "support_avg": 234, 
+                "precision_avg": 0.60, 
+                "recall_sell": 0.71, 
+                "support_buy": 108, 
+                "precision_buy": 0.58, 
+                "support_sell": 126, 
+                "name": "RBF SVM", 
+                "recall_buy": 0.46, 
+                "opt_period": 20, 
+                "recall_avg": 0.60, 
+                "precision_sell": 0.61, 
+                "f1_avg": 0.59
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "RBF SVM (20)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (40)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (5)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (45)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (15)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (5)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (40)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (1)", 
+                    0.54, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "^VIX"
+        }, 
+        {
+            "inference": "downward", 
+            "name": "CBOE Interest Rate 10 Year T No", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    2.83, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    2.83, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    2.84, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    2.79, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    2.78, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.51, 
+                "f1_sell": 0.66, 
+                "support_avg": 233, 
+                "precision_avg": 0.60, 
+                "recall_sell": 0.74, 
+                "support_buy": 109, 
+                "precision_buy": 0.60, 
+                "support_sell": 124, 
+                "name": "Gaussian Process", 
+                "recall_buy": 0.44, 
+                "opt_period": 10, 
+                "recall_avg": 0.60, 
+                "precision_sell": 0.60, 
+                "f1_avg": 0.59
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Gaussian Process (10)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (5)", 
+                    0.58, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (40)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (35)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (35)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (10)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (1)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (25)", 
+                    0.55, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "^TNX"
+        }, 
+        {
+            "inference": "upward", 
+            "name": "Dow Jones Industrial Average", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    23957.89, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    23533.20, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    24202.60, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    23857.71, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    23848.42, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.60, 
+                "f1_sell": 0.57, 
+                "support_avg": 234, 
+                "precision_avg": 0.61, 
+                "recall_sell": 0.67, 
+                "support_buy": 138, 
+                "precision_buy": 0.70, 
+                "support_sell": 96, 
+                "name": "Nearest Neighbors", 
+                "recall_buy": 0.53, 
+                "opt_period": 40, 
+                "recall_avg": 0.59, 
+                "precision_sell": 0.50, 
+                "f1_avg": 0.59
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Nearest Neighbors (40)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "AdaBoost (15)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (45)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (1)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (35)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "AdaBoost (45)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (40)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (5)", 
+                    0.54, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#4CAF50", 
+            "inference_day": "Thu", 
+            "symbol": "^DJI"
+        }, 
+        {
+            "inference": "downward", 
+            "name": "Alphabet Inc.", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    1049.08, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    1021.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    1053.21, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    1005.10, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    1004.56, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.60, 
+                "f1_sell": 0.57, 
+                "support_avg": 234, 
+                "precision_avg": 0.60, 
+                "recall_sell": 0.63, 
+                "support_buy": 131, 
+                "precision_buy": 0.65, 
+                "support_sell": 103, 
+                "name": "QDA", 
+                "recall_buy": 0.55, 
+                "opt_period": 40, 
+                "recall_avg": 0.59, 
+                "precision_sell": 0.52, 
+                "f1_avg": 0.59
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "QDA (40)", 
+                    0.59, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (10)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (30)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "QDA (45)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (30)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (1)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "QDA (35)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (10)", 
+                    0.55, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "GOOG"
+        }, 
+        {
+            "inference": "downward", 
+            "name": "Microsoft Corporation", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    89.79, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    87.18, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    93.78, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    89.47, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    89.39, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.62, 
+                "f1_sell": 0.54, 
+                "support_avg": 234, 
+                "precision_avg": 0.58, 
+                "recall_sell": 0.53, 
+                "support_buy": 127, 
+                "precision_buy": 0.61, 
+                "support_sell": 107, 
+                "name": "Linear SVM", 
+                "recall_buy": 0.62, 
+                "opt_period": 1, 
+                "recall_avg": 0.58, 
+                "precision_sell": 0.54, 
+                "f1_avg": 0.58
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Linear SVM (1)", 
+                    0.58, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Random Forest (50)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (45)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (5)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (35)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (1)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (45)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (15)", 
+                    0.55, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "MSFT"
+        }, 
+        {
+            "inference": "upward", 
+            "name": "Apple Inc.", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    168.85, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    164.94, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    172.77, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    168.34, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    166.48, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.59, 
+                "f1_sell": 0.56, 
+                "support_avg": 234, 
+                "precision_avg": 0.58, 
+                "recall_sell": 0.53, 
+                "support_buy": 115, 
+                "precision_buy": 0.56, 
+                "support_sell": 119, 
+                "name": "Random Forest", 
+                "recall_buy": 0.63, 
+                "opt_period": 15, 
+                "recall_avg": 0.58, 
+                "precision_sell": 0.59, 
+                "f1_avg": 0.58
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Random Forest (15)", 
+                    0.58, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (40)", 
+                    0.57, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (20)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (5)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (40)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (5)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (25)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (50)", 
+                    0.55, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#4CAF50", 
+            "inference_day": "Thu", 
+            "symbol": "AAPL"
+        }, 
+        {
+            "inference": "upward", 
+            "name": "Alphabet Inc.", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    1053.15, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    1026.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    1054.09, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    1006.94, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    1005.18, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.57, 
+                "f1_sell": 0.56, 
+                "support_avg": 234, 
+                "precision_avg": 0.57, 
+                "recall_sell": 0.60, 
+                "support_buy": 126, 
+                "precision_buy": 0.61, 
+                "support_sell": 108, 
+                "name": "Gaussian Process", 
+                "recall_buy": 0.53, 
+                "opt_period": 50, 
+                "recall_avg": 0.56, 
+                "precision_sell": 0.52, 
+                "f1_avg": 0.56
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Gaussian Process (50)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (1)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (1)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "QDA (40)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Random Forest (45)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "QDA (50)", 
+                    0.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (50)", 
+                    0.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Naive Bayes (5)", 
+                    0.54, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#4CAF50", 
+            "inference_day": "Thu", 
+            "symbol": "GOOGL"
+        }, 
+        {
+            "inference": "downward", 
+            "name": "Amazon.com, Inc.", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    1544.92, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    1495.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    1555.86, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    1497.05, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    1431.42, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.53, 
+                "f1_sell": 0.60, 
+                "support_avg": 234, 
+                "precision_avg": 0.56, 
+                "recall_sell": 0.61, 
+                "support_buy": 111, 
+                "precision_buy": 0.54, 
+                "support_sell": 123, 
+                "name": "Gaussian Process", 
+                "recall_buy": 0.51, 
+                "opt_period": 20, 
+                "recall_avg": 0.56, 
+                "precision_sell": 0.58, 
+                "f1_avg": 0.56
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Gaussian Process (20)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "QDA (50)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (45)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (10)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (25)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (25)", 
+                    0.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (35)", 
+                    0.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Nearest Neighbors (35)", 
+                    0.53, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#F44336", 
+            "inference_day": "Thu", 
+            "symbol": "AMZN"
+        }, 
+        {
+            "inference": "upward", 
+            "name": "Nasdaq Composite", 
+            "hist_prices": [
+                [
+                    "Date", 
+                    "Open", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Thu", 
+                    7166.68, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Fri", 
+                    6992.67, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Mon", 
+                    7220.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Tue", 
+                    7008.81, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Wed", 
+                    6949.23, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "top_model": {
+                "f1_buy": 0.63, 
+                "f1_sell": 0.47, 
+                "support_avg": 234, 
+                "precision_avg": 0.56, 
+                "recall_sell": 0.43, 
+                "support_buy": 130, 
+                "precision_buy": 0.60, 
+                "support_sell": 104, 
+                "name": "Gaussian Process", 
+                "recall_buy": 0.67, 
+                "opt_period": 15, 
+                "recall_avg": 0.56, 
+                "precision_sell": 0.51, 
+                "f1_avg": 0.56
+            }, 
+            "model_f1s": [
+                [
+                    "Model", 
+                    "f1", 
+                    {
+                        "role": "style"
+                    }
+                ], 
+                [
+                    "Gaussian Process (15)", 
+                    0.56, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Random Forest (20)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Decision Tree (30)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (35)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Gaussian Process (35)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "RBF SVM (15)", 
+                    0.55, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (30)", 
+                    0.54, 
+                    "color: #2196F3"
+                ], 
+                [
+                    "Linear SVM (20)", 
+                    0.54, 
+                    "color: #2196F3"
+                ]
+            ], 
+            "inference_color": "#4CAF50", 
+            "inference_day": "Thu", 
+            "symbol": "^IXIC"
+        }
+    ]
+}

@@ -29,12 +29,12 @@ classifier_names = [
 ]
 classifiers = {
 
-    "Nearest Neighbors":KNeighborsClassifier(n_jobs=-1),
+    "Nearest Neighbors":KNeighborsClassifier(n_jobs=1),
     "Linear SVM":LinearSVC(),
     "RBF SVM":SVC(cache_size=10000),
-    "Gaussian Process":GaussianProcessClassifier(n_jobs=-1),
+    "Gaussian Process":GaussianProcessClassifier(n_jobs=1),
     "Decision Tree":DecisionTreeClassifier(),
-    "Random Forest":RandomForestClassifier(n_jobs=-1),
+    "Random Forest":RandomForestClassifier(n_jobs=1),
     #"Neural Net":MLPClassifier(alpha=1),
     "AdaBoost":AdaBoostClassifier(),
     "Naive Bayes":GaussianNB(),
@@ -58,13 +58,15 @@ param_dict = {
                   'linearsvc__loss': ['squared_hinge'],
                   'linearsvc__tol': [1e-3,1e-4,1e-5,1e-6], 
                   'linearsvc__dual': [False, True], 
-                  'linearsvc__class_weight':['balanced', None]
+                  'linearsvc__class_weight':['balanced', None],
+                  'linearsvc__max_iter':[100,500,1000,5000]
                   },
     "RBF SVM":{"pca__n_components": [None],
                'svc__C': expon(scale=10), 
                'svc__gamma': expon(scale=.1),
                'svc__kernel': ['rbf'], 
-               'svc__class_weight':['balanced', None]
+               'svc__class_weight':['balanced', None],
+               'svc__max_iter':[-1,100,500,1000,5000]
               },
     "Gaussian Process":{"pca__n_components": [None],
                         "gaussianprocessclassifier__kernel": kernel_list,

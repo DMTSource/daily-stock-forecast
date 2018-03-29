@@ -37,7 +37,7 @@ def download_historical(symbol):
     print('\nDownloading\t\"%s\"'%symbol)
 
     # setup timespan per asset
-    hist_len = 252*10
+    hist_len = 252*5
     end   = datetime.datetime.now(tz=timezone('US/Eastern')) + BDay(0) # Last full business day
     start = end - BDay(hist_len)#+hist_len*0.1) 
 
