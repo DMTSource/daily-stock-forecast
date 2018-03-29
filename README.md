@@ -40,10 +40,10 @@ Dependencies
 * Python 2.7+
 * numpy 
 * pandas
+* pandas-datastore==0.5.0
 * pytz
 * scikit-learn
-* googledatastore
-* Polymer 2
+* Polymer 2+
 
 Usage
 ------------
